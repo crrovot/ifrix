@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 
 const AUTH_HASH_KEY = 'ifrix_auth_hash';
 const AUTH_TOKEN_KEY = 'ifrix_auth_token';
+const DEFAULT_PASSWORD = 'Ifrix2025#';
 
 const AuthContext = createContext();
 export const useLocalAuth = () => useContext(AuthContext);
@@ -32,6 +33,13 @@ export const LocalAuthProvider = ({ children }) => {
     const login = async (password) => {
         setLoading(true);
         try {
+            // Si el password coincide con el hardcoded, aceptar login
+            if (password === DEFAULT_PASSWORD) {
+                const token = JSON.stringify({ t: Date.now(), exp: Date.now() + 1000 * 60 * 60 * 24 * 7 });
+                localStorage.setItem(AUTH_TOKEN_KEY, token);
+                setIsAuthenticated(true);
+                return true;
+            }
             const hash = localStorage.getItem(AUTH_HASH_KEY);
             if (!hash) return false;
             const ok = bcrypt.compareSync(password, hash);

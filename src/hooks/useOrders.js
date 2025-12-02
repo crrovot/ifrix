@@ -14,9 +14,20 @@ export const useOrders = () => {
     const [newOrder, setNewOrder] = useState(INITIAL_ORDER_STATE);
     const [editingOrder, setEditingOrder] = useState(null); // Orden en edición
 
-    // Cargar datos al montar
+    // Cargar datos al montar y asegurar que cada orden tenga id
     useEffect(() => {
-        setOrders(loadFromLocalStorage(STORAGE_KEYS.ORDERS));
+        const stored = loadFromLocalStorage(STORAGE_KEYS.ORDERS) || [];
+        let migrated = false;
+        const normalized = stored.map(o => {
+            if (!o.id) {
+                migrated = true;
+                return { ...o, id: uuidv4() };
+            }
+            return o;
+        });
+        setOrders(normalized);
+        // Si migramos, persistimos de nuevo con ids
+        if (migrated) saveToLocalStorage(STORAGE_KEYS.ORDERS, normalized);
     }, []);
 
     // Valores calculados para la nueva orden
@@ -89,12 +100,20 @@ export const useOrders = () => {
 
     // Eliminar orden
     const deleteOrder = useCallback((id) => {
+        if (!id) {
+            toast.error('ID de orden inválido.');
+            return;
+        }
         const order = orders.find(o => o.id === id);
-        if (window.confirm(`¿Eliminar la orden "${order?.workOrderNumber}"?`)) {
+        if (!order) {
+            toast.error('Orden no encontrada.');
+            return;
+        }
+        if (window.confirm(`¿Eliminar la orden "${order.workOrderNumber}"?`)) {
             const updatedOrders = orders.filter(o => o.id !== id);
             setOrders(updatedOrders);
             saveToLocalStorage(STORAGE_KEYS.ORDERS, updatedOrders);
-            toast.success(`Orden "${order?.workOrderNumber}" eliminada.`);
+            toast.success(`Orden "${order.workOrderNumber}" eliminada.`);
         }
     }, [orders]);
 
