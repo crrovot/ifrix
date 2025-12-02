@@ -5,3 +5,4 @@ export { OrderSummary } from './OrderSummary';
 export { OrderList } from './OrderList';
 export { RecentOrders } from './RecentOrders';
 export { OrdersPage } from './OrdersPage';
+export { EditOrderModal } from './EditOrderModal';

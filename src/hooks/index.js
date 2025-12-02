@@ -3,3 +3,4 @@
 export { useTechnicians } from './useTechnicians';
 export { useOrders } from './useOrders';
 export { useReports } from './useReports';
+export { LocalAuthProvider, useLocalAuth } from './useLocalAuth.jsx';

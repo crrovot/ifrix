@@ -1,12 +1,20 @@
-// Lista de órdenes responsive
+// Lista de órdenes responsive con edición y eliminación
 
 import React from 'react';
-import { BookOpenIcon } from 'lucide-react';
+import { BookOpenIcon, PencilIcon, TrashIcon } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-export const OrderList = ({ orders, technicians, title = "Todas las Órdenes" }) => {
-    const getTechnicianName = (techId) => {
-        const tech = technicians.find(t => t.id === techId);
+export const OrderList = ({ 
+    orders, 
+    technicians, 
+    title = "Todas las Órdenes",
+    onEdit,
+    onDelete,
+}) => {
+    const getTechnicianName = (order) => {
+        // Primero usar nombre guardado, luego buscar
+        if (order.technicianName) return order.technicianName;
+        const tech = technicians.find(t => t.id === order.technicianId);
         return tech?.name || '-';
     };
 
@@ -29,7 +37,9 @@ export const OrderList = ({ orders, technicians, title = "Todas las Órdenes" })
                     <OrderCardXS 
                         key={order.id} 
                         order={order} 
-                        techName={getTechnicianName(order.technicianId)} 
+                        techName={getTechnicianName(order)}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
                     />
                 ))}
                 {orders.length === 0 && (
@@ -43,7 +53,9 @@ export const OrderList = ({ orders, technicians, title = "Todas las Órdenes" })
                     <OrderCardSM 
                         key={order.id} 
                         order={order} 
-                        techName={getTechnicianName(order.technicianId)} 
+                        techName={getTechnicianName(order)}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
                     />
                 ))}
                 {orders.length === 0 && (
@@ -62,17 +74,36 @@ export const OrderList = ({ orders, technicians, title = "Todas las Órdenes" })
                             <th className="px-3 py-2 text-left font-medium text-gray-600 uppercase">Técnico</th>
                             <th className="px-3 py-2 text-right font-medium text-gray-600 uppercase">Bruto</th>
                             <th className="px-3 py-2 text-right font-medium text-gray-600 uppercase">Comisión</th>
+                            <th className="px-3 py-2 text-center font-medium text-gray-600 uppercase">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {orders.map((order) => (
+                        {orders.slice().reverse().map((order) => (
                             <tr key={order.id} className="hover:bg-gray-50">
                                 <td className="px-3 py-2 text-gray-600">{order.date}</td>
                                 <td className="px-3 py-2 font-semibold text-gray-800">{order.workOrderNumber}</td>
                                 <td className="px-3 py-2 text-gray-700 max-w-[200px] truncate">{order.clientName}</td>
-                                <td className="px-3 py-2 text-cyan-700 font-medium">{getTechnicianName(order.technicianId)}</td>
+                                <td className="px-3 py-2 text-cyan-700 font-medium">{getTechnicianName(order)}</td>
                                 <td className="px-3 py-2 text-right font-medium">{formatCurrency(order.rawCost)}</td>
                                 <td className="px-3 py-2 text-right font-bold text-orange-600">{formatCurrency(order.commissionValue)}</td>
+                                <td className="px-3 py-2">
+                                    <div className="flex items-center justify-center gap-1">
+                                        <button
+                                            onClick={() => onEdit?.(order)}
+                                            className="p-1.5 text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
+                                            title="Editar"
+                                        >
+                                            <PencilIcon className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => onDelete?.(order.id)}
+                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Eliminar"
+                                        >
+                                            <TrashIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
@@ -85,12 +116,26 @@ export const OrderList = ({ orders, technicians, title = "Todas las Órdenes" })
     );
 };
 
-// Card para XS
-const OrderCardXS = ({ order, techName }) => (
-    <div className="p-2 border-b border-gray-100 hover:bg-gray-50 active:bg-gray-100">
+// Card para XS con acciones
+const OrderCardXS = ({ order, techName, onEdit, onDelete }) => (
+    <div className="p-2 border-b border-gray-100 hover:bg-gray-50">
         <div className="flex justify-between items-start mb-0.5">
             <span className="font-semibold text-gray-800 text-[11px]">{order.workOrderNumber}</span>
-            <span className="font-bold text-orange-600 text-[11px]">{formatCurrency(order.commissionValue)}</span>
+            <div className="flex items-center gap-1">
+                <span className="font-bold text-orange-600 text-[11px]">{formatCurrency(order.commissionValue)}</span>
+                <button
+                    onClick={() => onEdit?.(order)}
+                    className="p-1 text-cyan-600 hover:bg-cyan-50 rounded"
+                >
+                    <PencilIcon className="w-3 h-3" />
+                </button>
+                <button
+                    onClick={() => onDelete?.(order.id)}
+                    className="p-1 text-red-500 hover:bg-red-50 rounded"
+                >
+                    <TrashIcon className="w-3 h-3" />
+                </button>
+            </div>
         </div>
         <p className="text-[10px] text-gray-600 truncate">{order.clientName}</p>
         <div className="flex justify-between mt-0.5 text-[9px] text-gray-500">
@@ -100,12 +145,26 @@ const OrderCardXS = ({ order, techName }) => (
     </div>
 );
 
-// Card para SM
-const OrderCardSM = ({ order, techName }) => (
-    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 active:bg-gray-100">
+// Card para SM con acciones
+const OrderCardSM = ({ order, techName, onEdit, onDelete }) => (
+    <div className="p-3 border-b border-gray-100 hover:bg-gray-50">
         <div className="flex justify-between items-start mb-1">
             <span className="font-semibold text-gray-800 text-xs">{order.workOrderNumber}</span>
-            <span className="font-bold text-orange-600 text-xs">{formatCurrency(order.commissionValue)}</span>
+            <div className="flex items-center gap-1.5">
+                <span className="font-bold text-orange-600 text-xs">{formatCurrency(order.commissionValue)}</span>
+                <button
+                    onClick={() => onEdit?.(order)}
+                    className="p-1.5 text-cyan-600 hover:bg-cyan-50 rounded-lg"
+                >
+                    <PencilIcon className="w-3.5 h-3.5" />
+                </button>
+                <button
+                    onClick={() => onDelete?.(order.id)}
+                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
+                >
+                    <TrashIcon className="w-3.5 h-3.5" />
+                </button>
+            </div>
         </div>
         <p className="text-[11px] text-gray-600 truncate">{order.clientName}</p>
         <div className="flex justify-between mt-1 text-[10px] text-gray-500">

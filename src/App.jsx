@@ -15,6 +15,8 @@ import { Header, MainContainer } from './components/layout';
 import { OrdersPage } from './components/orders';
 import { TechnicianManager } from './components/technicians';
 import { ReportsPage } from './components/reports';
+import { SEO, OrdersSEO, TechniciansSEO, ReportsSEO, Login } from './components/common';
+import { useLocalAuth } from './hooks';
 
 const App = () => {
     // Estado de navegacion
@@ -33,8 +35,15 @@ const App = () => {
         orders,
         newOrder,
         calculatedValues,
+        editingOrder,
+        editingCalculatedValues,
         handleOrderChange,
         addOrder,
+        deleteOrder,
+        startEditOrder,
+        cancelEditOrder,
+        handleEditOrderChange,
+        saveEditOrder,
     } = useOrders();
 
     // Handlers
@@ -47,8 +56,33 @@ const App = () => {
         setMobileMenuOpen(prev => !prev);
     };
 
+    // SEO dinámico según la tab activa
+    const renderSEO = () => {
+        switch (activeTab) {
+            case TABS.ORDERS:
+                return <OrdersSEO />;
+            case TABS.TECHNICIANS:
+                return <TechniciansSEO />;
+            case TABS.REPORTS:
+                return <ReportsSEO />;
+            default:
+                return <SEO />;
+        }
+    };
+
+    const { isAuthenticated, logout } = useLocalAuth();
+
+    if (!isAuthenticated) {
+        // Mostrar pantalla de login y no renderizar el resto
+        return <Login />;
+    }
+
     return (
-        <div className="min-h-screen bg-slate-100 font-sans">
+        <>
+            {/* SEO dinámico */}
+            {renderSEO()}
+            
+            <div className="min-h-screen bg-slate-100 font-sans">
             {/* Notificaciones Toast */}
             <Toaster 
                 position="top-center" 
@@ -68,6 +102,7 @@ const App = () => {
                 onTabChange={handleTabChange}
                 mobileMenuOpen={mobileMenuOpen}
                 onToggleMobileMenu={toggleMobileMenu}
+                onLogout={logout}
             />
 
             {/* Contenido principal */}
@@ -80,7 +115,15 @@ const App = () => {
                         newOrder={newOrder}
                         calculatedValues={calculatedValues}
                         onOrderChange={handleOrderChange}
-                        onSubmit={addOrder}
+                        onSubmit={(e) => addOrder(e, technicians)}
+                        // Edición
+                        editingOrder={editingOrder}
+                        editingCalculatedValues={editingCalculatedValues}
+                        onEditOrder={startEditOrder}
+                        onDeleteOrder={deleteOrder}
+                        onEditChange={handleEditOrderChange}
+                        onSaveEdit={saveEditOrder}
+                        onCancelEdit={cancelEditOrder}
                     />
                 )}
 
@@ -102,6 +145,7 @@ const App = () => {
                 )}
             </MainContainer>
         </div>
+        </>
     );
 };
 

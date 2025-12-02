@@ -49,8 +49,9 @@ export const useReports = (orders, technicians) => {
     // Agrupar reportes por técnico
     const groupedReports = useMemo(() => {
         return reportResults.reduce((acc, order) => {
-            const tech = technicians.find(t => t.id === order.technicianId) || { name: 'Desconocido' };
-            const techName = tech.name;
+            // Primero intentar usar el nombre guardado en la orden, luego buscar en técnicos
+            const tech = technicians.find(t => t.id === order.technicianId);
+            const techName = order.technicianName || tech?.name || 'Desconocido';
 
             if (!acc[techName]) {
                 acc[techName] = {

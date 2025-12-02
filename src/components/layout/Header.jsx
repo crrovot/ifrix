@@ -8,7 +8,8 @@ export const Header = ({
     activeTab, 
     onTabChange, 
     mobileMenuOpen, 
-    onToggleMobileMenu 
+    onToggleMobileMenu,
+    onLogout,
 }) => {
     const handleTabClick = (tab) => {
         onTabChange(tab);
@@ -57,6 +58,16 @@ export const Header = ({
                     />
                 </nav>
 
+                {/* Logout */}
+                <div className="hidden md:flex items-center gap-2">
+                    <button
+                        onClick={onLogout}
+                        className="text-sm px-3 py-1.5 rounded hover:bg-gray-800 bg-transparent"
+                    >
+                        Salir
+                    </button>
+                </div>
+
                 {/* Botón Hamburguesa */}
                 <button 
                     onClick={onToggleMobileMenu} 
@@ -88,6 +99,15 @@ export const Header = ({
                         icon={<BookOpenIcon className="w-5 h-5 mr-3 flex-shrink-0" />}
                         label="Reportes"
                     />
+                    {/* Logout mobile */}
+                    <div className="px-3 mt-2">
+                        <button
+                            onClick={onLogout}
+                            className="w-full text-left px-3 py-3 text-sm rounded-lg flex items-center bg-red-600 text-white"
+                        >
+                            Salir
+                        </button>
+                    </div>
                 </nav>
             )}
         </header>
