@@ -8,7 +8,7 @@ export const useReports = (orders, technicians) => {
     const [reportResults, setReportResults] = useState([]);
     const [isFetchingReport, setIsFetchingReport] = useState(false);
     const [expandedTech, setExpandedTech] = useState(null);
-    
+
     const [reportDateRange, setReportDateRange] = useState({
         start: getFirstDayOfMonthISO(),
         end: getTodayISO(),
@@ -28,11 +28,13 @@ export const useReports = (orders, technicians) => {
                 );
             }
 
-            // Filtrar por rango de fechas
+            // Filtrar por rango de fechas (usar date o createdAt)
             filteredOrders = filteredOrders.filter(order => {
-                const orderDate = new Date(order.date);
+                const orderDate = new Date(order.date || order.createdAt || order.timestamp);
                 const startDate = new Date(reportDateRange.start);
+                // Ajustar endDate al final del día
                 const endDate = new Date(reportDateRange.end);
+                endDate.setHours(23, 59, 59, 999);
                 return orderDate >= startDate && orderDate <= endDate;
             });
 

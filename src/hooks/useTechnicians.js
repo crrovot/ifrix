@@ -1,67 +1,99 @@
-// Hook personalizado para gestión de técnicos
-
 import { useState, useEffect, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
-import { loadFromLocalStorage, saveToLocalStorage } from '../utils/storage';
-import { STORAGE_KEYS } from '../constants';
+import { supabase } from '../services/supabase';
 
 export const useTechnicians = () => {
-    const [technicians, setTechnicians] = useState(() => 
-        loadFromLocalStorage(STORAGE_KEYS.TECHNICIANS)
-    );
+    const [technicians, setTechnicians] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    // Cargar datos al montar
-    useEffect(() => {
-        setTechnicians(loadFromLocalStorage(STORAGE_KEYS.TECHNICIANS));
+    const fetchTechnicians = useCallback(async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('technicians')
+                .select('*')
+                .order('name');
+
+            if (error) throw error;
+
+            // Mapear snake_case a camelCase
+            const mappedTechs = data.map(t => ({
+                id: t.id,
+                name: t.name,
+                defaultCommissionRate: parseFloat(t.default_commission_rate),
+                active: t.active,
+                createdAt: t.created_at
+            }));
+
+            setTechnicians(mappedTechs);
+        } catch (error) {
+            console.error('Error fetching technicians:', error);
+            toast.error('Error al cargar técnicos.');
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    // Obtener técnicos activos
+    useEffect(() => {
+        fetchTechnicians();
+    }, [fetchTechnicians]);
+
     const activeTechnicians = technicians.filter(t => t.active !== false);
 
-    // Agregar técnico
-    const addTechnician = useCallback((name, rate) => {
+    const addTechnician = useCallback(async (name, rate) => {
         if (!name.trim()) {
-            toast.error('El nombre del técnico es requerido.');
-            return false;
-        }
-        
-        // Verificar duplicados
-        const existingTech = technicians.find(
-            t => t.name.toLowerCase() === name.trim().toLowerCase() && t.active !== false
-        );
-        if (existingTech) {
-            toast.error(`Ya existe un técnico con el nombre "${name}".`);
+            toast.error('Nombre requerido.');
             return false;
         }
 
-        const newTechnician = { 
-            id: uuidv4(), 
-            name: name.trim(), 
-            defaultCommissionRate: parseFloat(rate) / 100 || 0.10,
-            active: true,
-            createdAt: new Date().toISOString()
+        // Check duplicates locally
+        const exists = technicians.find(t => t.name.toLowerCase() === name.trim().toLowerCase() && t.active);
+        if (exists) {
+            toast.error('Ya existe un técnico con ese nombre.');
+            return false;
+        }
+
+        const newTech = {
+            name: name.trim(),
+            default_commission_rate: parseFloat(rate) / 100 || 0.10,
+            active: true
         };
-        
-        const updatedTechnicians = [...technicians, newTechnician];
-        setTechnicians(updatedTechnicians);
-        saveToLocalStorage(STORAGE_KEYS.TECHNICIANS, updatedTechnicians);
-        toast.success(`Técnico "${name}" agregado exitosamente.`);
-        return true;
-    }, [technicians]);
 
-    // Desactivar técnico (soft delete)
-    const deleteTechnician = useCallback((id) => {
-        const tech = technicians.find(t => t.id === id);
-        const updatedTechnicians = technicians.map(t => 
-            t.id === id ? { ...t, active: false } : t
-        );
-        setTechnicians(updatedTechnicians);
-        saveToLocalStorage(STORAGE_KEYS.TECHNICIANS, updatedTechnicians);
-        toast.success(`Técnico "${tech?.name}" desactivado.`);
-    }, [technicians]);
+        try {
+            const { error } = await supabase
+                .from('technicians')
+                .insert([newTech]);
 
-    // Buscar técnico por ID
+            if (error) throw error;
+
+            toast.success('Técnico agregado.');
+            fetchTechnicians();
+            return true;
+        } catch (error) {
+            console.error('Error adding technician:', error);
+            toast.error('Error al guardar técnico.');
+            return false;
+        }
+    }, [technicians, fetchTechnicians]);
+
+    const deleteTechnician = useCallback(async (id) => {
+        try {
+            // Soft delete
+            const { error } = await supabase
+                .from('technicians')
+                .update({ active: false })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            toast.success('Técnico desactivado.');
+            fetchTechnicians();
+        } catch (error) {
+            console.error('Error deleting technician:', error);
+            toast.error('Error al desactivar técnico.');
+        }
+    }, [fetchTechnicians]);
+
     const getTechnicianById = useCallback((id) => {
         return technicians.find(t => t.id === id);
     }, [technicians]);
@@ -72,5 +104,6 @@ export const useTechnicians = () => {
         addTechnician,
         deleteTechnician,
         getTechnicianById,
+        loading
     };
 };

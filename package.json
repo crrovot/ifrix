@@ -10,6 +10,7 @@
     "serve": "vite preview --port 3000 --host"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.87.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^0.441.0",

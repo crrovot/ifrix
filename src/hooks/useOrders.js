@@ -1,45 +1,66 @@
-// Hook personalizado para gestión de órdenes
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
-import { loadFromLocalStorage, saveToLocalStorage } from '../utils/storage';
 import { calculateOrderValues } from '../utils/calculations';
-import { STORAGE_KEYS, INITIAL_ORDER_STATE } from '../constants';
+import { INITIAL_ORDER_STATE } from '../constants';
+import { supabase } from '../services/supabase';
 
 export const useOrders = () => {
-    const [orders, setOrders] = useState(() => 
-        loadFromLocalStorage(STORAGE_KEYS.ORDERS)
-    );
+    const [orders, setOrders] = useState([]);
     const [newOrder, setNewOrder] = useState(INITIAL_ORDER_STATE);
-    const [editingOrder, setEditingOrder] = useState(null); // Orden en edición
+    const [editingOrder, setEditingOrder] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    // Cargar datos al montar y asegurar que cada orden tenga id
-    useEffect(() => {
-        const stored = loadFromLocalStorage(STORAGE_KEYS.ORDERS) || [];
-        let migrated = false;
-        const normalized = stored.map(o => {
-            if (!o.id) {
-                migrated = true;
-                return { ...o, id: uuidv4() };
-            }
-            return o;
-        });
-        setOrders(normalized);
-        // Si migramos, persistimos de nuevo con ids
-        if (migrated) saveToLocalStorage(STORAGE_KEYS.ORDERS, normalized);
+    // Cargar órdenes
+    const fetchOrders = useCallback(async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Mapear campos de snake_case (Supabase) a camelCase (App)
+            const mappedOrders = data.map(o => ({
+                id: o.id,
+                workOrderNumber: o.work_order_number,
+                technicianId: o.technician_id,
+                technicianName: o.technician_name,
+                clientName: o.client_name || '',
+                rawCost: parseFloat(o.raw_cost) || 0,
+                materialsCost: parseFloat(o.materials_cost) || 0,
+                commissionRate: parseFloat(o.commission_rate) || 0,
+                commissionValue: parseFloat(o.commission_value) || 0,
+                date: o.date,
+                timestamp: o.timestamp,
+                createdAt: o.created_at,
+                updatedAt: o.updated_at
+            }));
+
+            setOrders(mappedOrders);
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            toast.error('Error al cargar las órdenes.');
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    // Valores calculados para la nueva orden
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
+
+    // Valores calculados
     const calculatedValues = useMemo(() => {
         const { rawCost, materialsCost, commissionRate } = newOrder;
         return calculateOrderValues(rawCost, materialsCost, commissionRate);
     }, [newOrder.rawCost, newOrder.materialsCost, newOrder.commissionRate]);
 
-    // Manejar cambios en el formulario
+    // Manejar cambios en formulario
     const handleOrderChange = useCallback((e) => {
         const { name, value } = e.target;
-        
         if (name === 'rawCost' || name === 'materialsCost') {
             const numValue = parseFloat(value) || 0;
             setNewOrder(prev => ({ ...prev, [name]: numValue }));
@@ -52,85 +73,88 @@ export const useOrders = () => {
     }, []);
 
     // Agregar orden
-    const addOrder = useCallback((e, technicians = []) => {
+    const addOrder = useCallback(async (e, technicians = []) => {
         e?.preventDefault();
-        
+
         if (!newOrder.technicianId) {
             toast.error('Debe seleccionar un técnico.');
             return false;
         }
 
-        // Validar orden única
         const orderNumber = newOrder.workOrderNumber.trim().toUpperCase();
+        // Verificar duplicados en local (optimista) o DB
         const existingOrder = orders.find(o => o.workOrderNumber.toUpperCase() === orderNumber);
         if (existingOrder) {
-            toast.error(`La orden N° ${orderNumber} ya existe. No se permiten órdenes duplicadas.`);
+            toast.error(`La orden N° ${orderNumber} ya existe.`);
             return false;
         }
 
-        // Obtener nombre del técnico para guardarlo en la orden
         const technician = technicians.find(t => t.id === newOrder.technicianId);
         const technicianName = technician?.name || 'Desconocido';
 
         const orderToSave = {
-            id: uuidv4(),
-            ...newOrder,
-            workOrderNumber: orderNumber,
-            technicianName, // Guardar nombre del técnico
-            commissionValue: calculatedValues.commissionValue,
+            work_order_number: orderNumber,
+            technician_id: newOrder.technicianId,
+            technician_name: technicianName,
+            client_name: newOrder.clientName || '',
+            raw_cost: newOrder.rawCost,
+            materials_cost: newOrder.materialsCost,
+            commission_rate: newOrder.commissionRate,
+            commission_value: calculatedValues.commissionValue,
+            date: newOrder.date || new Date().toISOString().split('T')[0],
             timestamp: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
         };
 
-        const updatedOrders = [...orders, orderToSave];
-        setOrders(updatedOrders);
-        saveToLocalStorage(STORAGE_KEYS.ORDERS, updatedOrders);
+        try {
+            const { data, error } = await supabase
+                .from('orders')
+                .insert([orderToSave])
+                .select();
 
-        toast.success(`¡Orden N° ${orderToSave.workOrderNumber} agregada exitosamente!`);
-        
-        // Resetear formulario manteniendo técnico y comisión
-        setNewOrder({
-            ...INITIAL_ORDER_STATE,
-            technicianId: newOrder.technicianId,
-            commissionRate: newOrder.commissionRate,
-        });
-        
-        return true;
-    }, [newOrder, orders, calculatedValues.commissionValue]);
+            if (error) throw error;
+
+            toast.success(`Orden N° ${orderNumber} agregada.`);
+            fetchOrders(); // Recargar lista
+
+            setNewOrder({
+                ...INITIAL_ORDER_STATE,
+                technicianId: newOrder.technicianId,
+                commissionRate: newOrder.commissionRate,
+            });
+            return true;
+        } catch (error) {
+            console.error('Error adding order:', error);
+            toast.error('Error al guardar la orden.');
+            return false;
+        }
+    }, [newOrder, orders, calculatedValues, fetchOrders]);
 
     // Eliminar orden
-    const deleteOrder = useCallback((id) => {
-        if (!id) {
-            toast.error('ID de orden inválido.');
-            return;
-        }
-        const order = orders.find(o => o.id === id);
-        if (!order) {
-            toast.error('Orden no encontrada.');
-            return;
-        }
-        if (window.confirm(`¿Eliminar la orden "${order.workOrderNumber}"?`)) {
-            const updatedOrders = orders.filter(o => o.id !== id);
-            setOrders(updatedOrders);
-            saveToLocalStorage(STORAGE_KEYS.ORDERS, updatedOrders);
-            toast.success(`Orden "${order.workOrderNumber}" eliminada.`);
-        }
-    }, [orders]);
+    const deleteOrder = useCallback(async (id) => {
+        if (!window.confirm('¿Estás seguro de eliminar esta orden?')) return;
 
-    // Iniciar edición de orden
-    const startEditOrder = useCallback((order) => {
-        setEditingOrder({ ...order });
+        try {
+            const { error } = await supabase
+                .from('orders')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            toast.success('Orden eliminada.');
+            setOrders(prev => prev.filter(o => o.id !== id));
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            toast.error('Error al eliminar la orden.');
+        }
     }, []);
 
-    // Cancelar edición
-    const cancelEditOrder = useCallback(() => {
-        setEditingOrder(null);
-    }, []);
+    // Edición
+    const startEditOrder = useCallback((order) => setEditingOrder({ ...order }), []);
+    const cancelEditOrder = useCallback(() => setEditingOrder(null), []);
 
-    // Manejar cambios en orden en edición
     const handleEditOrderChange = useCallback((e) => {
         const { name, value } = e.target;
-        
         if (name === 'rawCost' || name === 'materialsCost') {
             const numValue = parseFloat(value) || 0;
             setEditingOrder(prev => ({ ...prev, [name]: numValue }));
@@ -142,40 +166,48 @@ export const useOrders = () => {
         }
     }, []);
 
-    // Guardar orden editada
-    const saveEditOrder = useCallback((technicians = []) => {
+    const saveEditOrder = useCallback(async (technicians = []) => {
         if (!editingOrder) return false;
 
-        // Recalcular comisión
         const { commissionValue } = calculateOrderValues(
             editingOrder.rawCost,
             editingOrder.materialsCost,
             editingOrder.commissionRate
         );
 
-        // Obtener nombre del técnico actualizado
         const technician = technicians.find(t => t.id === editingOrder.technicianId);
         const technicianName = technician?.name || editingOrder.technicianName || 'Desconocido';
 
-        const updatedOrder = {
-            ...editingOrder,
-            technicianName,
-            commissionValue,
-            updatedAt: new Date().toISOString(),
+        const updates = {
+            work_order_number: editingOrder.workOrderNumber,
+            technician_id: editingOrder.technicianId,
+            technician_name: technicianName,
+            raw_cost: editingOrder.rawCost,
+            materials_cost: editingOrder.materialsCost,
+            commission_rate: editingOrder.commissionRate,
+            commission_value: commissionValue,
+            updated_at: new Date().toISOString(),
         };
 
-        const updatedOrders = orders.map(o => 
-            o.id === editingOrder.id ? updatedOrder : o
-        );
+        try {
+            const { error } = await supabase
+                .from('orders')
+                .update(updates)
+                .eq('id', editingOrder.id);
 
-        setOrders(updatedOrders);
-        saveToLocalStorage(STORAGE_KEYS.ORDERS, updatedOrders);
-        setEditingOrder(null);
-        toast.success(`Orden "${updatedOrder.workOrderNumber}" actualizada.`);
-        return true;
-    }, [editingOrder, orders]);
+            if (error) throw error;
 
-    // Valores calculados para orden en edición
+            toast.success('Orden actualizada.');
+            setEditingOrder(null);
+            fetchOrders();
+            return true;
+        } catch (error) {
+            console.error('Error updating order:', error);
+            toast.error('Error al actualizar la orden.');
+            return false;
+        }
+    }, [editingOrder, fetchOrders]);
+
     const editingCalculatedValues = useMemo(() => {
         if (!editingOrder) return null;
         return calculateOrderValues(
@@ -184,11 +216,6 @@ export const useOrders = () => {
             editingOrder.commissionRate
         );
     }, [editingOrder]);
-
-    // Resetear formulario
-    const resetForm = useCallback(() => {
-        setNewOrder(INITIAL_ORDER_STATE);
-    }, []);
 
     return {
         orders,
@@ -203,7 +230,7 @@ export const useOrders = () => {
         cancelEditOrder,
         handleEditOrderChange,
         saveEditOrder,
-        resetForm,
         setNewOrder,
+        loading
     };
 };
