@@ -8,7 +8,6 @@ export const INITIAL_ORDER_STATE = {
     materialsCost: 0,
     commissionRate: 0.10,
     technicianId: '',
-    date: new Date().toISOString().split('T')[0],
 };
 
 export const STORAGE_KEYS = {
