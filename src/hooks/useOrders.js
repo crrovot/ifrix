@@ -28,12 +28,12 @@ export const useOrders = () => {
                 workOrderNumber: o.work_order_number,
                 technicianId: o.technician_id,
                 technicianName: o.technician_name,
-                clientName: o.client_name || '',
+                clientName: '',
                 rawCost: parseFloat(o.raw_cost) || 0,
                 materialsCost: parseFloat(o.materials_cost) || 0,
                 commissionRate: parseFloat(o.commission_rate) || 0,
                 commissionValue: parseFloat(o.commission_value) || 0,
-                date: o.date,
+                date: o.created_at ? o.created_at.split('T')[0] : '',
                 timestamp: o.timestamp,
                 createdAt: o.created_at,
                 updatedAt: o.updated_at
@@ -67,6 +67,10 @@ export const useOrders = () => {
         } else if (name === 'commissionRate') {
             const numValue = parseFloat(value) || 0;
             setNewOrder(prev => ({ ...prev, [name]: numValue / 100 }));
+        } else if (name === 'technicianId') {
+            // Convertir a número si es un ID numérico (común en Supabase)
+            const techId = /^\d+$/.test(value) ? parseInt(value, 10) : value;
+            setNewOrder(prev => ({ ...prev, [name]: techId }));
         } else {
             setNewOrder(prev => ({ ...prev, [name]: value }));
         }
@@ -89,30 +93,34 @@ export const useOrders = () => {
             return false;
         }
 
-        const technician = technicians.find(t => t.id === newOrder.technicianId);
+        const technician = technicians.find(t => String(t.id) === String(newOrder.technicianId));
         const technicianName = technician?.name || 'Desconocido';
 
         const orderToSave = {
             work_order_number: orderNumber,
             technician_id: newOrder.technicianId,
             technician_name: technicianName,
-            client_name: newOrder.clientName || '',
             raw_cost: newOrder.rawCost,
             materials_cost: newOrder.materialsCost,
             commission_rate: newOrder.commissionRate,
             commission_value: calculatedValues.commissionValue,
-            date: newOrder.date || new Date().toISOString().split('T')[0],
             timestamp: new Date().toISOString(),
         };
 
         try {
+            console.log('Guardando orden:', orderToSave);
+            
             const { data, error } = await supabase
                 .from('orders')
                 .insert([orderToSave])
                 .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error de Supabase:', error);
+                throw error;
+            }
 
+            console.log('Orden guardada exitosamente:', data);
             toast.success(`Orden N° ${orderNumber} agregada.`);
             fetchOrders(); // Recargar lista
 
@@ -123,8 +131,21 @@ export const useOrders = () => {
             });
             return true;
         } catch (error) {
-            console.error('Error adding order:', error);
-            toast.error('Error al guardar la orden.');
+            console.error('Error completo al agregar orden:', error);
+            
+            // Mostrar mensaje de error más específico
+            let errorMsg = 'Error al guardar la orden.';
+            if (error.message) {
+                errorMsg += ` ${error.message}`;
+            }
+            if (error.details) {
+                errorMsg += ` Detalles: ${error.details}`;
+            }
+            if (error.hint) {
+                console.log('Hint:', error.hint);
+            }
+            
+            toast.error(errorMsg);
             return false;
         }
     }, [newOrder, orders, calculatedValues, fetchOrders]);
@@ -161,6 +182,10 @@ export const useOrders = () => {
         } else if (name === 'commissionRate') {
             const numValue = parseFloat(value) || 0;
             setEditingOrder(prev => ({ ...prev, [name]: numValue / 100 }));
+        } else if (name === 'technicianId') {
+            // Convertir a número si es un ID numérico
+            const techId = /^\d+$/.test(value) ? parseInt(value, 10) : value;
+            setEditingOrder(prev => ({ ...prev, [name]: techId }));
         } else {
             setEditingOrder(prev => ({ ...prev, [name]: value }));
         }
@@ -175,7 +200,7 @@ export const useOrders = () => {
             editingOrder.commissionRate
         );
 
-        const technician = technicians.find(t => t.id === editingOrder.technicianId);
+        const technician = technicians.find(t => String(t.id) === String(editingOrder.technicianId));
         const technicianName = technician?.name || editingOrder.technicianName || 'Desconocido';
 
         const updates = {

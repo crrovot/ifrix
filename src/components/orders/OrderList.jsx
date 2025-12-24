@@ -14,7 +14,7 @@ export const OrderList = ({
     const getTechnicianName = (order) => {
         // Primero usar nombre guardado, luego buscar
         if (order.technicianName) return order.technicianName;
-        const tech = technicians.find(t => t.id === order.technicianId);
+        const tech = technicians.find(t => String(t.id) === String(order.technicianId));
         return tech?.name || '-';
     };
 

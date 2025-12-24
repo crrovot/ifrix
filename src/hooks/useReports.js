@@ -24,7 +24,7 @@ export const useReports = (orders, technicians) => {
             // Filtrar por técnico
             if (selectedTechnicianId !== 'all') {
                 filteredOrders = filteredOrders.filter(
-                    order => order.technicianId === selectedTechnicianId
+                    order => String(order.technicianId) === String(selectedTechnicianId)
                 );
             }
 
@@ -52,7 +52,7 @@ export const useReports = (orders, technicians) => {
     const groupedReports = useMemo(() => {
         return reportResults.reduce((acc, order) => {
             // Primero intentar usar el nombre guardado en la orden, luego buscar en técnicos
-            const tech = technicians.find(t => t.id === order.technicianId);
+            const tech = technicians.find(t => String(t.id) === String(order.technicianId));
             const techName = order.technicianName || tech?.name || 'Desconocido';
 
             if (!acc[techName]) {
