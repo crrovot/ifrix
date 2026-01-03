@@ -19,4 +19,5 @@ export const TABS = {
     ORDERS: 'orders',
     TECHNICIANS: 'technicians',
     REPORTS: 'reports',
+    MONITOR: 'monitor',
 };

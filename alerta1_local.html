@@ -1,0 +1,568 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.4">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; -webkit-text-stroke: #000000; min-height: 16.0px}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="es"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Monitor v11.0 | User Management Full&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&amp;display=swap" rel="stylesheet"&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* --- ESTILOS --- */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>:root {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--primary: #2563eb; --bg-body: #f1f5f9; --bg-card: #ffffff;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--text-main: #1e293b; --text-light: #64748b; --border: #e2e8f0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--status-green: #10b981; --status-orange: #f59e0b; --status-red: #ef4444;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--status-blue: #3b82f6; /* Color edición */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--radius: 8px; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-dark {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--primary: #3b82f6; --bg-body: #0f172a; --bg-card: #1e293b;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--text-main: #f8fafc; --text-light: #94a3b8; --border: #334155;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--shadow: 0 4px 6px -1px rgba(0,0,0,0.3);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-dark {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--primary: #00ff41; --bg-body: #000000; --bg-card: #050505; --text-main: #ffffff;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--text-light: #cccccc; --border: #00ff41; --radius: 0px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--status-green: #008f11; --status-orange: #ff9900; --status-red: #ff0000;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--status-blue: #0088ff;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--primary: #000000; --bg-body: #ffffff; --bg-card: #ffffff; --text-main: #000000;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--text-light: #333333; --border: #000000; --radius: 0px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--status-green: #4ade80; --status-orange: #fbbf24; --status-red: #f87171;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--status-blue: #60a5fa;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-dark input, .theme-ifrix-dark select { background: #000; color: #fff; border: 1px solid #00ff41; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light input, .theme-ifrix-light select { background: #fff; color: #000; border: 2px solid #000; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light .panel { border: 2px solid #000; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: 0.3s; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.header { background: var(--bg-card); padding: 10px 20px; height: 50px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.app-title { font-weight: 800; font-size: 1.1rem; color: var(--primary); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-dark .app-title { text-shadow: 0 0 10px var(--primary); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.tabs-container { display: flex; justify-content: center; gap: 10px; padding: 10px; background: var(--bg-body); flex-shrink: 0; border-bottom: 1px solid var(--border); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.tab-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-light); padding: 8px 20px; border-radius: var(--radius); font-weight: 600; cursor: pointer; font-size: 0.9rem; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-dark .tab-btn.active { color: black; font-weight: 900; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light .tab-btn.active { background: black; color: #00ff41; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.content-area { flex: 1; position: relative; overflow: hidden; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.section-scroll { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 20px; display: none; flex-direction: column; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.section-scroll.active { display: flex; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.section-fixed { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; display: none; flex-direction: column; padding: 0; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.section-fixed.active { display: flex; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.panel { background: var(--bg-card); border-radius: var(--radius); padding: 25px; border: 1px solid var(--border); margin-bottom: 15px; box-shadow: var(--shadow); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.form-group { margin-bottom: 15px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.8rem; color: var(--text-light); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>input, select { width: 100%; padding: 10px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-body); color: var(--text-main); font-size: 1rem; box-sizing: border-box; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.big-input { font-size: 2rem; font-weight: 800; text-align: center; color: var(--primary); }</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn { background: var(--primary); color: white; border: none; padding: 12px; border-radius: var(--radius); font-weight: 600; cursor: pointer; width: 100%; transition: 0.2s; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 8px 15px; cursor: pointer; }</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* BOTONES ACCION PEQUEÑOS */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.action-group { display: flex; gap: 5px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn-sm { padding: 5px 10px; font-size: 0.75rem; border-radius: 4px; cursor: pointer; border: none; color: white; font-weight: bold; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn-edit { background-color: var(--status-blue); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn-delete { background-color: var(--status-red); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn-cancel { background-color: var(--text-light); margin-top: 10px; display: none; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light .btn { color: #00ff41; }<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light .btn-outline { border-color: black; }<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.ifrix-mode .btn-outline { color: #fff; border-color: #00ff41; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#monitor-container { flex: 1; display: grid; gap: 10px; padding: 10px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.order-card { background: var(--bg-card); border-radius: var(--radius); display: flex; flex-direction: column; justify-content: space-between; padding: 10px; position: relative; color: white !important; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); transition: all 0.3s ease; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-dark .order-card { border: 1px solid #333; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light .order-card { border: 2px solid black; color: black !important; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light .order-card .card-num { color: black; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.bg-green { background: var(--status-green); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.bg-orange { background: var(--status-orange); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.bg-red { background: var(--status-red); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.bg-critical { background: var(--status-red); border: 4px solid #fff; animation: shake 0.5s infinite; z-index:10; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light .bg-critical { border-color: black; color: white !important; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px) rotate(-2deg)} 75%{transform:translateX(5px) rotate(2deg)} }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.card-header { display: flex; justify-content: space-between; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.card-num { font-weight: 900; line-height: 1; font-size: 5vh; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.card-tech { font-weight: 700; text-align: center; text-transform: uppercase; background: rgba(0,0,0,0.2); border-radius: 4px; font-size: 2.5vh; margin: 1vh 0; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.card-footer { display: flex; justify-content: space-between; align-items: flex-end; font-size: 1.5vh; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.card-info-text { max-width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; text-transform: uppercase; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.card-timer { font-family: monospace; font-weight: 700; font-size: 3vh; }</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.tiny-card .card-tech, .tiny-card .card-footer .card-cat, .tiny-card .card-user { display: none; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.tiny-card .card-num { font-size: 8vh; text-align: center; width: 100%; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.close-card-btn { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.3); color: white; border: none; width: 25px; height: 25px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 20; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-ifrix-light .close-card-btn { background: black; color: #00ff41; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#login-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: var(--bg-body); z-index: 2000; display: flex; justify-content: center; align-items: center; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.data-list { list-style: none; padding: 0; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.data-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.theme-btn { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#auditTableBody td { padding: 10px; border-bottom: 1px solid var(--border); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#auditTableBody tr:last-child td { border-bottom: none; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="login-screen"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="panel" style="width: 300px; text-align: center;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h2 style="color:var(--primary); margin-top:0;"&gt;MONITOR v11.0&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="form-group"&gt;&lt;input type="text" id="loginUser" placeholder="Usuario (admin)"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="form-group"&gt;&lt;input type="password" id="loginPass" placeholder="Clave (1234)"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button class="btn" onclick="login()"&gt;INGRESAR&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="app-interface" style="display:none; height:100%; flex-direction:column;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="header"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;span class="app-title"&gt;MONITOR ENTERPRISE&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div style="display:flex; align-items:center; gap: 15px;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button id="themeToggle" class="theme-btn" onclick="cycleTheme()"&gt;🎨 Tema&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div style="font-size: 0.8rem; text-align: right;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span id="userInfo" style="font-weight:bold;"&gt;&lt;/span&gt;&lt;br&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span id="branchInfo" style="opacity:0.7;"&gt;&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button onclick="logout()" style="background:var(--status-red); border:none; color:white; padding:5px 10px; border-radius:4px; cursor:pointer;"&gt;Salir&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="tabs-container"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button class="tab-btn active" onclick="showTab('tab-entry', this)"&gt;1. Crear&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button class="tab-btn" onclick="showTab('tab-monitor', this)"&gt;2. Monitor&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button class="tab-btn" id="btn-config" onclick="showTab('tab-config', this)"&gt;3. Config&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button class="tab-btn" id="btn-audit" onclick="showTab('tab-audit', this)" style="display:none;"&gt;4. Auditoría&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="content-area"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="tab-entry" class="section-scroll active"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div style="max-width: 500px; margin: 0 auto; width: 100%;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="panel"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;h2 style="color:var(--primary); margin-top:0;"&gt;Nuevo Turno&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;input type="number" id="inputOrderId" class="big-input" placeholder="00" oninput="validarNum(this)"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;select id="selectTech"&gt;&lt;option value=""&gt;-- Técnico --&lt;/option&gt;&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;select id="selectCategory"&gt;&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button class="btn" style="margin-top:15px;" onclick="addOrder()"&gt;PUBLICAR&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="panel" style="border-left: 4px solid var(--status-orange);"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;h3 style="margin:0 0 10px 0;"&gt;Mis Órdenes Activas&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;ul id="entryOrderList" class="data-list"&gt;&lt;/ul&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="tab-monitor" class="section-fixed"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div style="padding: 10px; display:flex; justify-content:space-between; background:rgba(0,0,0,0.05);"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div id="admin-filter-container" style="display:none;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;select id="adminBranchFilter" onchange="updateMonitor()" style="padding:5px; width:auto;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;option value="all"&gt;Ver Todo&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;button class="btn-outline" onclick="clearAll()" style="font-size:0.8rem; padding:2px 8px;"&gt;Limpiar Mi Pantalla&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="monitor-container"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="tab-config" class="section-scroll"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="config-grid"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="panel"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h3&gt;Sucursales&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div style="display:flex; gap:5px;"&gt;&lt;input id="newBranchName" placeholder="Nombre"&gt;&lt;button class="btn" style="width:auto;" onclick="addBranch()"&gt;+&lt;/button&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;ul id="branchList" class="data-list"&gt;&lt;/ul&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="panel"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h3&gt;Técnicos&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div style="display:flex; gap:5px;"&gt;&lt;input id="newTechName" placeholder="Nombre"&gt;&lt;button class="btn" style="width:auto;" onclick="addTech()"&gt;+&lt;/button&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;ul id="techList" class="data-list"&gt;&lt;/ul&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="panel"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h3&gt;Gestión de Usuarios&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="form-group"&gt;&lt;input id="newUserName" placeholder="Usuario"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="form-group"&gt;&lt;input id="newUserPass" placeholder="Clave" type="password"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="form-group"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;label&gt;Rol:&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;select id="newUserRole"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;option value="creator"&gt;Operador&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;option value="admin"&gt;Admin&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="form-group"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;label&gt;Asignar Sucursal:&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;select id="newUserBranch"&gt;&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button id="btn-save-user" class="btn" onclick="saveUserProcess()"&gt;Crear Usuario&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button id="btn-cancel-edit" class="btn btn-cancel" onclick="cancelEditUser()"&gt;Cancelar Edición&lt;/button&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;ul id="usersList" class="data-list" style="margin-top:20px;"&gt;&lt;/ul&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="panel"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h3&gt;Categorías&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;input id="catName" placeholder="Nombre" style="margin-bottom:5px;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div style="display:flex; gap:5px; margin-bottom:5px;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;input id="catOr" placeholder="Nar" type="number"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;input id="catRe" placeholder="Roj" type="number"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;input id="catCr" placeholder="Cri" type="number"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button class="btn" onclick="addCat()"&gt;Agregar&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;ul id="catList" class="data-list"&gt;&lt;/ul&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="tab-audit" class="section-scroll"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="panel"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;h3&gt;Auditoría&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;input id="auditSearch" placeholder="Buscar ticket..." style="margin-bottom:10px;" onkeyup="searchAudit()"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;table style="width:100%; border-collapse:collapse; font-size:0.9rem;"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;thead&gt;&lt;tr style="text-align:left; border-bottom:1px solid var(--border);"&gt;&lt;th&gt;Ticket&lt;/th&gt;&lt;th&gt;Sucursal&lt;/th&gt;&lt;th&gt;Acción&lt;/th&gt;&lt;th&gt;Fecha y Hora&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;tbody id="auditTableBody"&gt;&lt;/tbody&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/table&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const DB_KEY = 'monitor_v11_0_user_edit';</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let data = {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>branches: [{id: 1, name: "Principal"}],</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>users: [{name:'admin', pass:'1234', role:'admin', branchId: 1}],</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>cats: [{id:1, name:'General', tOr:2, tRe:5, tCr:10}],</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>techs: [{id:1, name:'Juan'}],</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>orders: [],</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>history: []</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let currentUser = null;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let editingUserOriginalName = null; // Variable para saber si editamos</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let currentTheme = localStorage.getItem('appTheme') || 'light';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function init() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const stored = localStorage.getItem(DB_KEY);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(stored) data = JSON.parse(stored);</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('loginPass').addEventListener('keyup', e =&gt; { if(e.key === 'Enter') login(); });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('inputOrderId').addEventListener('keyup', e =&gt; { if(e.key === 'Enter') addOrder(); });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('auditSearch').addEventListener('keyup', e =&gt; { if(e.key === 'Enter') searchAudit(); });</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>applyTheme();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>setInterval(updateMonitor, 1000);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function saveData() { localStorage.setItem(DB_KEY, JSON.stringify(data)); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- THEMES ---</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function cycleTheme() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(currentTheme === 'light') currentTheme = 'dark';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>else if(currentTheme === 'dark') currentTheme = 'ifrix-dark';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>else if(currentTheme === 'ifrix-dark') currentTheme = 'ifrix-light';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>else currentTheme = 'light';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>applyTheme();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function applyTheme() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.body.className = ''; const btn = document.getElementById('themeToggle');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(currentTheme === 'dark') { document.body.classList.add('theme-dark'); btn.innerText = "🌙 Oscuro"; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>else if(currentTheme === 'ifrix-dark') { document.body.classList.add('theme-ifrix-dark'); btn.innerText = "🟢 Ifrix Dark"; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>else if(currentTheme === 'ifrix-light') { document.body.classList.add('theme-ifrix-light'); btn.innerText = "⚪ Ifrix Light"; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>else { btn.innerText = "🌞 Claro"; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>localStorage.setItem('appTheme', currentTheme);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- AUTH ---</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function login() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const u = document.getElementById('loginUser').value.trim();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const p = document.getElementById('loginPass').value.trim();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const found = data.users.find(x =&gt; x.name === u &amp;&amp; x.pass === p);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(found) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>currentUser = found;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('login-screen').style.display = 'none';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('app-interface').style.display = 'flex';</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const bName = data.branches.find(b=&gt;b.id == currentUser.branchId)?.name || "Global";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('userInfo').innerText = currentUser.name.toUpperCase();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('branchInfo').innerText = bName;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const isAdmin = currentUser.role === 'admin';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('btn-config').style.display = isAdmin ? 'block' : 'none';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('btn-audit').style.display = isAdmin ? 'block' : 'none';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('admin-filter-container').style.display = isAdmin ? 'block' : 'none';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(isAdmin) { renderConfig(); renderAudit(); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>renderEntry();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>showTab('tab-entry', document.querySelector('.tab-btn'));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = '';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>updateMonitor();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else alert("Error de credenciales");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function logout() {<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>currentUser = null;<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('app-interface').style.display = 'none';<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('login-screen').style.display = 'flex';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('entryOrderList').innerHTML = ''; // Limpiar lista</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- MONITOR ---</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function updateMonitor() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(!currentUser) return;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const now = Date.now();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let orders = [];</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(currentUser.role === 'admin') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const f = document.getElementById('adminBranchFilter').value;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>orders = (f === 'all') ? data.orders : data.orders.filter(o =&gt; o.branchId == f);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>orders = data.orders.filter(o =&gt; o.branchId == currentUser.branchId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>orders.sort((a, b) =&gt; a.start - b.start);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>updateEntryList(orders); // Refrescar lista lateral</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const container = document.getElementById('monitor-container');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(!container.offsetParent) return;<span class="Apple-converted-space"> </span></span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const count = orders.length;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>container.innerHTML = '';<span class="Apple-converted-space"> </span></span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(count &gt; 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const width = container.clientWidth; const height = container.clientHeight; const ratio = width / height;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let cols = Math.ceil(Math.sqrt(count * ratio)); let rows = Math.ceil(count / cols);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`; container.style.gridTemplateRows = `repeat(${rows}, 1fr)`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const isTiny = (count &gt; 15);<span class="Apple-converted-space"> </span></span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let html = '';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>orders.forEach(o =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const cat = data.cats.find(c =&gt; c.id === o.catId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const branch = data.branches.find(b =&gt; b.id == o.branchId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const branchName = branch ? branch.name : "??";</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if(!cat) return;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const elapsedMin = (now - o.start) / 60000;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let css = 'bg-green';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if(elapsedMin &gt;= cat.tCr) css = 'bg-critical';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>else if(elapsedMin &gt;= cat.tRe) css = 'bg-red';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>else if(elapsedMin &gt;= cat.tOr) css = 'bg-orange';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const sec = Math.floor((now - o.start)/1000);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const timeStr = `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const canDel = (currentUser.role === 'admin' || currentUser.branchId == o.branchId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const delBtn = canDel ? `&lt;button class="close-card-btn" onclick="delOrder(${o.id})"&gt;X&lt;/button&gt;` : '';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const tinyClass = isTiny ? 'tiny-card' : '';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>html += `&lt;div class="order-card ${css} ${tinyClass}"&gt;${delBtn}&lt;div class="card-header"&gt;&lt;div class="card-num"&gt;${o.id}&lt;/div&gt;&lt;div class="card-user"&gt;${o.creator}&lt;/div&gt;&lt;/div&gt;&lt;div class="card-tech"&gt;${o.tech}&lt;/div&gt;&lt;div class="card-footer"&gt;&lt;div class="card-info-text"&gt;${cat.name} - ${branchName}&lt;/div&gt;&lt;div class="card-timer"&gt;${timeStr}&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>container.innerHTML = html;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function validarNum(i){ i.value = i.value.replace(/[^0-9]/g,''); }</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function addOrder() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const id = parseInt(document.getElementById('inputOrderId').value);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const tech = document.getElementById('selectTech').value;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const catId = parseInt(document.getElementById('selectCategory').value);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(!id) return alert("Falta numero");</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const duplicate = data.orders.find(o =&gt; o.id === id);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(duplicate) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const conflictBranch = data.branches.find(b =&gt; b.id == duplicate.branchId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const conflictName = conflictBranch ? conflictBranch.name : "Desconocida";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return alert(`¡ERROR!\nLa orden #${id} ya está activa en la sucursal: ${conflictName}.`);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>data.orders.push({ id, tech: tech||"PEND", catId, creator: currentUser.name, branchId: currentUser.branchId, start: Date.now() });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>saveData(); document.getElementById('inputOrderId').value = ''; document.getElementById('inputOrderId').focus(); updateMonitor();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function delOrder(id) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(confirm("¿Borrar?")) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const o = data.orders.find(x =&gt; x.id === id);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(o) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>data.history.push({...o, deletedBy: currentUser.name, deletedAt: Date.now()});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>data.orders = data.orders.filter(x =&gt; x.id !== id);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>saveData(); updateMonitor(); renderAudit();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function clearAll() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(confirm("¿Limpiar pantalla?")) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let toKill = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(currentUser.role === 'admin') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const f = document.getElementById('adminBranchFilter').value;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>toKill = (f === 'all') ? data.orders : data.orders.filter(o =&gt; o.branchId == f);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>toKill = data.orders.filter(o =&gt; o.branchId == currentUser.branchId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>toKill.forEach(o =&gt; data.history.push({...o, deletedBy: currentUser.name, deletedAt: Date.now()}));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>data.orders = data.orders.filter(o =&gt; !toKill.some(k =&gt; k === o));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>saveData(); updateMonitor(); renderAudit();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function updateEntryList(filteredOrders) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const list = document.getElementById('entryOrderList'); if(!list) return;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>list.innerHTML = filteredOrders.map(o =&gt; `&lt;li class="data-item"&gt;&lt;span&gt;#${o.id} (${o.tech})&lt;/span&gt;&lt;button onclick="delOrder(${o.id})" style="background:var(--status-red); border:none; color:white; border-radius:4px; cursor:pointer;"&gt;X&lt;/button&gt;&lt;/li&gt;`).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- GESTIÓN USUARIOS (NUEVA LÓGICA COMPLETA) ---</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function renderConfig() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('branchList').innerHTML = data.branches.map(b =&gt; `&lt;li class="data-item"&gt;${b.name} &lt;button class="btn-outline" style="border:none; color:red;" onclick="dropBranch(${b.id})"&gt;X&lt;/button&gt;&lt;/li&gt;`).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('techList').innerHTML = data.techs.map(t =&gt; `&lt;li class="data-item"&gt;${t.name} &lt;button class="btn-outline" style="border:none; color:red;" onclick="dropTech(${t.id})"&gt;X&lt;/button&gt;&lt;/li&gt;`).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('catList').innerHTML = data.cats.map(c =&gt; `&lt;li class="data-item"&gt;${c.name} &lt;button class="btn-outline" style="border:none; color:red;" onclick="dropCat(${c.id})"&gt;X&lt;/button&gt;&lt;/li&gt;`).join('');</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// RENDER LISTA USUARIOS CON BOTONES DE EDICIÓN</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('usersList').innerHTML = data.users.map(u =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const b = data.branches.find(br =&gt; br.id == u.branchId); const bName = b ? b.name : "??";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;li class="data-item"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span&gt;${u.name} (${u.role}) - &lt;small style="color:var(--status-purple)"&gt;${bName}&lt;/small&gt;&lt;/span&gt;<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="action-group"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button class="btn-sm btn-edit" onclick="prepareEditUser('${u.name}')"&gt;Edit&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button class="btn-sm btn-delete" onclick="dropUser('${u.name}')"&gt;X&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/li&gt;`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}).join('');</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('newUserBranch').innerHTML = data.branches.map(b =&gt; `&lt;option value="${b.id}"&gt;${b.name}&lt;/option&gt;`).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 1. Proceso de Guardar (Crear o Actualizar)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function saveUserProcess() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const n = document.getElementById('newUserName').value.trim();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const p = document.getElementById('newUserPass').value.trim();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const r = document.getElementById('newUserRole').value;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const b = document.getElementById('newUserBranch').value;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(!n || !p) return alert("Faltan datos");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (editingUserOriginalName) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// MODO EDICIÓN</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const index = data.users.findIndex(u =&gt; u.name === editingUserOriginalName);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (index !== -1) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>// Si cambió el nombre, verificar que no choque con otro</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if(n !== editingUserOriginalName &amp;&amp; data.users.some(u =&gt; u.name === n)) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>return alert("El nuevo nombre de usuario ya está en uso.");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>data.users[index] = { name: n, pass: p, role: r, branchId: b };</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>saveData(); alert("Usuario actualizado"); cancelEditUser();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// MODO CREACIÓN</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(data.users.some(u =&gt; u.name === n)) return alert("El usuario ya existe");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>data.users.push({name:n, pass:p, role:r, branchId:b});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>saveData(); document.getElementById('newUserName').value=''; document.getElementById('newUserPass').value='';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>renderConfig();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 2. Cargar datos en el formulario</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function prepareEditUser(name) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const user = data.users.find(u =&gt; u.name === name);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(!user) return;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('newUserName').value = user.name;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('newUserPass').value = user.pass;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('newUserRole').value = user.role;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('newUserBranch').value = user.branchId;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>editingUserOriginalName = name; // Marcar que estamos editando</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const btnSave = document.getElementById('btn-save-user');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>btnSave.innerText = "Guardar Cambios";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>btnSave.style.background = "var(--status-blue)";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('btn-cancel-edit').style.display = "block";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 3. Cancelar</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function cancelEditUser() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>editingUserOriginalName = null;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('newUserName').value = '';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('newUserPass').value = '';</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const btnSave = document.getElementById('btn-save-user');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>btnSave.innerText = "Crear Usuario";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>btnSave.style.background = "var(--primary)";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('btn-cancel-edit').style.display = "none";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 4. Borrar</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function dropUser(n){<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(n === currentUser.name) return alert("No puedes borrar tu propio usuario activo.");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(confirm("¿Eliminar usuario " + n + "?")) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>data.users = data.users.filter(x =&gt; x.name !== n); saveData(); renderConfig();<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- CONFIG (OTROS) ---</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function addBranch(){ const n=document.getElementById('newBranchName').value; if(n){ data.branches.push({id:Date.now(), name:n}); saveData(); renderConfig(); renderEntry(); }}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function dropBranch(id){ data.branches=data.branches.filter(x=&gt;x.id!==id); saveData(); renderConfig(); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function addTech(){ const n=document.getElementById('newTechName').value; if(n){ data.techs.push({id:Date.now(), name:n}); saveData(); renderConfig(); renderEntry(); }}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function dropTech(id){ data.techs=data.techs.filter(x=&gt;x.id!==id); saveData(); renderConfig(); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function addCat(){ const n=document.getElementById('catName').value; if(n){ data.cats.push({id:Date.now(), name:n, tOr:document.getElementById('catOr').value, tRe:document.getElementById('catRe').value, tCr:document.getElementById('catCr').value}); saveData(); renderConfig(); renderEntry(); }}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function dropCat(id){ data.cats=data.cats.filter(x=&gt;x.id!==id); saveData(); renderConfig(); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- AUDIT ---</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function renderEntry() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('selectTech').innerHTML = '&lt;option value=""&gt;-- Sin Asignar --&lt;/option&gt;' + data.techs.map(t =&gt; `&lt;option value="${t.name}"&gt;${t.name}&lt;/option&gt;`).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('selectCategory').innerHTML = data.cats.map(c =&gt; `&lt;option value="${c.id}"&gt;${c.name}&lt;/option&gt;`).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(currentUser.role === 'admin') document.getElementById('adminBranchFilter').innerHTML = '&lt;option value="all"&gt;Ver Todo&lt;/option&gt;' + data.branches.map(b =&gt; `&lt;option value="${b.id}"&gt;${b.name}&lt;/option&gt;`).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function renderAudit() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const list = data.history.slice().reverse().slice(0, 50);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('auditTableBody').innerHTML = list.map(h =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const bName = data.branches.find(b =&gt; b.id == h.branchId)?.name || '??';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return `&lt;tr&gt;&lt;td&gt;${h.id}&lt;/td&gt;&lt;td&gt;${bName}&lt;/td&gt;&lt;td&gt;${h.deletedBy}&lt;/td&gt;&lt;td&gt;${new Date(h.deletedAt).toLocaleString()}&lt;/td&gt;&lt;/tr&gt;`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function searchAudit() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>const term = document.getElementById('auditSearch').value; if(!term) { renderAudit(); return; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>const found = data.history.filter(h =&gt; h.id == term);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>document.getElementById('auditTableBody').innerHTML = found.map(h =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const bName = data.branches.find(b =&gt; b.id == h.branchId)?.name || '??';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return `&lt;tr&gt;&lt;td&gt;${h.id}&lt;/td&gt;&lt;td&gt;${bName}&lt;/td&gt;&lt;td&gt;${h.deletedBy}&lt;/td&gt;&lt;td&gt;${new Date(h.deletedAt).toLocaleString()}&lt;/td&gt;&lt;/tr&gt;`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>}).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function showTab(id, btn) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.querySelectorAll('.section-scroll, .section-fixed').forEach(e =&gt; e.classList.remove('active'));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.querySelectorAll('.tab-btn').forEach(e =&gt; e.classList.remove('active'));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById(id).classList.add('active');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>btn.classList.add('active');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(id === 'tab-monitor') updateMonitor();<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>init();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>

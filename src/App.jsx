@@ -15,12 +15,17 @@ import { Header, MainContainer } from './components/layout';
 import { OrdersPage } from './components/orders';
 import { TechnicianManager } from './components/technicians';
 import { ReportsPage } from './components/reports';
+import { AlertaMonitor } from './components/monitor';
 import { SEO, OrdersSEO, TechniciansSEO, ReportsSEO, Login } from './components/common';
 import { useLocalAuth } from './hooks';
 
 const App = () => {
-    // Estado de navegacion
-    const [activeTab, setActiveTab] = useState(TABS.ORDERS);
+    const { isAuthenticated, userRole, logout } = useLocalAuth();
+    
+    // Estado de navegacion - si es operador, iniciar en Monitor
+    const [activeTab, setActiveTab] = useState(
+        userRole === 'operator' ? TABS.MONITOR : TABS.ORDERS
+    );
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // Hooks de datos
@@ -70,7 +75,8 @@ const App = () => {
         }
     };
 
-    const { isAuthenticated, logout } = useLocalAuth();
+    // Eliminar línea de useLocalAuth duplicada
+    const isAdmin = userRole === 'admin';
 
     if (!isAuthenticated) {
         // Mostrar pantalla de login y no renderizar el resto
@@ -107,8 +113,8 @@ const App = () => {
 
             {/* Contenido principal */}
             <MainContainer>
-                {/* Tab: Ordenes */}
-                {activeTab === TABS.ORDERS && (
+                {/* Tab: Ordenes - Solo para admin */}
+                {activeTab === TABS.ORDERS && isAdmin && (
                     <OrdersPage 
                         orders={orders}
                         technicians={technicians}
@@ -127,8 +133,8 @@ const App = () => {
                     />
                 )}
 
-                {/* Tab: Tecnicos */}
-                {activeTab === TABS.TECHNICIANS && (
+                {/* Tab: Tecnicos - Solo para admin */}
+                {activeTab === TABS.TECHNICIANS && isAdmin && (
                     <TechnicianManager 
                         technicians={technicians}
                         onAddTechnician={addTechnician}
@@ -142,6 +148,11 @@ const App = () => {
                         orders={orders}
                         technicians={technicians}
                     />
+                )}
+
+                {/* Tab: Monitor de Alertas */}
+                {activeTab === TABS.MONITOR && (
+                    <AlertaMonitor />
                 )}
             </MainContainer>
         </div>

@@ -1,8 +1,9 @@
 // Componente Header con navegación responsive
 
 import React from 'react';
-import { PencilIcon, UsersIcon, BookOpenIcon, XIcon, MenuIcon } from 'lucide-react';
+import { PencilIcon, UsersIcon, BookOpenIcon, MonitorIcon, XIcon, MenuIcon } from 'lucide-react';
 import { TABS } from '../../constants';
+import { useLocalAuth } from '../../hooks';
 
 export const Header = ({ 
     activeTab, 
@@ -11,6 +12,9 @@ export const Header = ({
     onToggleMobileMenu,
     onLogout,
 }) => {
+    const { userRole } = useLocalAuth();
+    const isAdmin = userRole === 'admin';
+    
     const handleTabClick = (tab) => {
         onTabChange(tab);
         if (mobileMenuOpen) onToggleMobileMenu();
@@ -38,23 +42,33 @@ export const Header = ({
                 
                 {/* Menú Desktop */}
                 <nav className="hidden md:flex gap-1">
+                    {isAdmin && (
+                        <>
+                            <NavButton 
+                                active={activeTab === TABS.ORDERS}
+                                onClick={() => handleTabClick(TABS.ORDERS)}
+                                icon={<PencilIcon className="w-3.5 h-3.5 inline mr-1" />}
+                                label="Órdenes"
+                            />
+                            <NavButton 
+                                active={activeTab === TABS.TECHNICIANS}
+                                onClick={() => handleTabClick(TABS.TECHNICIANS)}
+                                icon={<UsersIcon className="w-3.5 h-3.5 inline mr-1" />}
+                                label="Técnicos"
+                            />
+                            <NavButton 
+                                active={activeTab === TABS.REPORTS}
+                                onClick={() => handleTabClick(TABS.REPORTS)}
+                                icon={<BookOpenIcon className="w-3.5 h-3.5 inline mr-1" />}
+                                label="Reportes"
+                            />
+                        </>
+                    )}
                     <NavButton 
-                        active={activeTab === TABS.ORDERS}
-                        onClick={() => handleTabClick(TABS.ORDERS)}
-                        icon={<PencilIcon className="w-3.5 h-3.5 inline mr-1" />}
-                        label="Órdenes"
-                    />
-                    <NavButton 
-                        active={activeTab === TABS.TECHNICIANS}
-                        onClick={() => handleTabClick(TABS.TECHNICIANS)}
-                        icon={<UsersIcon className="w-3.5 h-3.5 inline mr-1" />}
-                        label="Técnicos"
-                    />
-                    <NavButton 
-                        active={activeTab === TABS.REPORTS}
-                        onClick={() => handleTabClick(TABS.REPORTS)}
-                        icon={<BookOpenIcon className="w-3.5 h-3.5 inline mr-1" />}
-                        label="Reportes"
+                        active={activeTab === TABS.MONITOR}
+                        onClick={() => handleTabClick(TABS.MONITOR)}
+                        icon={<MonitorIcon className="w-3.5 h-3.5 inline mr-1" />}
+                        label="Monitor"
                     />
                 </nav>
 
@@ -81,23 +95,33 @@ export const Header = ({
             {/* Menú Móvil */}
             {mobileMenuOpen && (
                 <nav className="md:hidden bg-gray-900 border-t border-gray-700 px-2 xs:px-3 py-2 space-y-1 animate-slideDown">
+                    {isAdmin && (
+                        <>
+                            <MobileNavButton 
+                                active={activeTab === TABS.ORDERS}
+                                onClick={() => handleTabClick(TABS.ORDERS)}
+                                icon={<PencilIcon className="w-5 h-5 mr-3 flex-shrink-0" />}
+                                label="Ingreso de Órdenes"
+                            />
+                            <MobileNavButton 
+                                active={activeTab === TABS.TECHNICIANS}
+                                onClick={() => handleTabClick(TABS.TECHNICIANS)}
+                                icon={<UsersIcon className="w-5 h-5 mr-3 flex-shrink-0" />}
+                                label="Gestión de Técnicos"
+                            />
+                            <MobileNavButton 
+                                active={activeTab === TABS.REPORTS}
+                                onClick={() => handleTabClick(TABS.REPORTS)}
+                                icon={<BookOpenIcon className="w-5 h-5 mr-3 flex-shrink-0" />}
+                                label="Reportes"
+                            />
+                        </>
+                    )}
                     <MobileNavButton 
-                        active={activeTab === TABS.ORDERS}
-                        onClick={() => handleTabClick(TABS.ORDERS)}
-                        icon={<PencilIcon className="w-5 h-5 mr-3 flex-shrink-0" />}
-                        label="Ingreso de Órdenes"
-                    />
-                    <MobileNavButton 
-                        active={activeTab === TABS.TECHNICIANS}
-                        onClick={() => handleTabClick(TABS.TECHNICIANS)}
-                        icon={<UsersIcon className="w-5 h-5 mr-3 flex-shrink-0" />}
-                        label="Gestión de Técnicos"
-                    />
-                    <MobileNavButton 
-                        active={activeTab === TABS.REPORTS}
-                        onClick={() => handleTabClick(TABS.REPORTS)}
-                        icon={<BookOpenIcon className="w-5 h-5 mr-3 flex-shrink-0" />}
-                        label="Reportes"
+                        active={activeTab === TABS.MONITOR}
+                        onClick={() => handleTabClick(TABS.MONITOR)}
+                        icon={<MonitorIcon className="w-5 h-5 mr-3 flex-shrink-0" />}
+                        label="Monitor de Alertas"
                     />
                     {/* Logout mobile */}
                     <div className="px-3 mt-2">
