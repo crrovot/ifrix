@@ -256,6 +256,10 @@ const AlertaMonitor = () => {
     const getFilteredOrders = () => {
         if(!currentUser) return [];
         
+        console.log('getFilteredOrders - currentUser:', currentUser);
+        console.log('getFilteredOrders - data.orders:', data.orders);
+        console.log('getFilteredOrders - adminBranchFilter:', adminBranchFilter);
+        
         let orders = [];
         if(currentUser.role === 'admin') {
             // Admin puede ver todas o filtrar por sucursal específica
@@ -264,15 +268,21 @@ const AlertaMonitor = () => {
             // Operadores solo ven su sucursal
             orders = data.orders.filter(o => o.branchId == currentUser.branchId);
         }
+        
+        console.log('getFilteredOrders - orders filtradas:', orders);
         return orders.sort((a, b) => a.start - b.start);
     };
     
     const renderOrderCard = (o, isTiny, now) => {
-        const cat = data.cats.find(c => c.id === o.catId);
+        const cat = data.cats.find(c => c.id === o.catId) || { 
+            id: 0, 
+            name: 'Sin categoría', 
+            tOr: 2, 
+            tRe: 5, 
+            tCr: 10 
+        };
         const branch = data.branches.find(b => b.id == o.branchId);
         const branchName = branch ? branch.name : "??";
-        
-        if(!cat) return null;
         
         const elapsedMin = (now - o.start) / 60000;
         let colorClass = 'bg-green-600';

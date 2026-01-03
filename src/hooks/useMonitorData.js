@@ -30,6 +30,17 @@ export const useMonitorData = (currentUser) => {
                 monitorService.getHistory()
             ]);
 
+            console.log('Monitor data loaded:', {
+                branches: branches.length,
+                users: users.length,
+                categories: categories.length,
+                technicians: technicians.length,
+                orders: orders.length,
+                history: history.length
+            });
+            
+            console.log('Orders:', orders);
+
             setData({
                 branches,
                 users,
@@ -56,6 +67,14 @@ export const useMonitorData = (currentUser) => {
     // Cargar datos al montar
     useEffect(() => {
         loadData();
+        
+        // Polling cada 15 segundos para sincronizar datos entre sedes
+        const intervalId = setInterval(() => {
+            console.log('Refrescando datos del monitor...');
+            loadData();
+        }, 15000); // 15 segundos
+        
+        return () => clearInterval(intervalId);
     }, []);
 
     // Suscribirse a cambios en tiempo real
@@ -65,7 +84,8 @@ export const useMonitorData = (currentUser) => {
             .channel('monitor-orders-changes')
             .on('postgres_changes', 
                 { event: '*', schema: 'public', table: 'monitor_orders' },
-                async () => {
+                async (payload) => {
+                    console.log('Cambio detectado en monitor_orders:', payload);
                     const orders = await monitorService.getOrders();
                     setData(prev => ({ ...prev, orders }));
                 }
@@ -77,9 +97,23 @@ export const useMonitorData = (currentUser) => {
             .channel('monitor-history-changes')
             .on('postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'monitor_history' },
-                async () => {
+                async (payload) => {
+                    console.log('Cambio detectado en monitor_history:', payload);
                     const history = await monitorService.getHistory();
                     setData(prev => ({ ...prev, history }));
+                }
+            )
+            .subscribe();
+
+        // Suscripción a usuarios (para detectar nuevos usuarios creados)
+        const usersSubscription = supabase
+            .channel('monitor-users-changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'monitor_users' },
+                async (payload) => {
+                    console.log('Cambio detectado en monitor_users:', payload);
+                    const users = await monitorService.getMonitorUsers();
+                    setData(prev => ({ ...prev, users }));
                 }
             )
             .subscribe();
@@ -88,6 +122,7 @@ export const useMonitorData = (currentUser) => {
         return () => {
             ordersSubscription.unsubscribe();
             historySubscription.unsubscribe();
+            usersSubscription.unsubscribe();
         };
     }, []);
 
