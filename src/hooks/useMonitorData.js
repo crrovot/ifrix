@@ -85,7 +85,7 @@ export const useMonitorData = (currentUser) => {
             .on('postgres_changes', 
                 { event: '*', schema: 'public', table: 'monitor_orders' },
                 async (payload) => {
-                    console.log('Cambio detectado en monitor_orders:', payload);
+                    console.log('🔔 Cambio detectado en monitor_orders:', payload);
                     const orders = await monitorService.getOrders();
                     setData(prev => ({ ...prev, orders }));
                 }
@@ -98,22 +98,61 @@ export const useMonitorData = (currentUser) => {
             .on('postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'monitor_history' },
                 async (payload) => {
-                    console.log('Cambio detectado en monitor_history:', payload);
+                    console.log('🔔 Cambio detectado en monitor_history:', payload);
                     const history = await monitorService.getHistory();
                     setData(prev => ({ ...prev, history }));
                 }
             )
             .subscribe();
 
-        // Suscripción a usuarios (para detectar nuevos usuarios creados)
+        // Suscripción a usuarios
         const usersSubscription = supabase
             .channel('monitor-users-changes')
             .on('postgres_changes',
                 { event: '*', schema: 'public', table: 'monitor_users' },
                 async (payload) => {
-                    console.log('Cambio detectado en monitor_users:', payload);
+                    console.log('🔔 Cambio detectado en monitor_users:', payload);
                     const users = await monitorService.getMonitorUsers();
                     setData(prev => ({ ...prev, users }));
+                }
+            )
+            .subscribe();
+
+        // Suscripción a sucursales
+        const branchesSubscription = supabase
+            .channel('monitor-branches-changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'monitor_branches' },
+                async (payload) => {
+                    console.log('🔔 Cambio detectado en monitor_branches:', payload);
+                    const branches = await monitorService.getBranches();
+                    setData(prev => ({ ...prev, branches }));
+                }
+            )
+            .subscribe();
+
+        // Suscripción a técnicos
+        const techniciansSubscription = supabase
+            .channel('monitor-technicians-changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'monitor_technicians' },
+                async (payload) => {
+                    console.log('🔔 Cambio detectado en monitor_technicians:', payload);
+                    const technicians = await monitorService.getTechnicians();
+                    setData(prev => ({ ...prev, techs: technicians }));
+                }
+            )
+            .subscribe();
+
+        // Suscripción a categorías
+        const categoriesSubscription = supabase
+            .channel('monitor-categories-changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'monitor_categories' },
+                async (payload) => {
+                    console.log('🔔 Cambio detectado en monitor_categories:', payload);
+                    const categories = await monitorService.getCategories();
+                    setData(prev => ({ ...prev, cats: categories }));
                 }
             )
             .subscribe();
@@ -123,6 +162,9 @@ export const useMonitorData = (currentUser) => {
             ordersSubscription.unsubscribe();
             historySubscription.unsubscribe();
             usersSubscription.unsubscribe();
+            branchesSubscription.unsubscribe();
+            techniciansSubscription.unsubscribe();
+            categoriesSubscription.unsubscribe();
         };
     }, []);
 
