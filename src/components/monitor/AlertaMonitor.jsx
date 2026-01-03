@@ -5,11 +5,15 @@ import { useLocalAuth } from '../../hooks';
 const DB_KEY = 'monitor_v11_0_user_edit';
 
 const AlertaMonitor = () => {
-    const { userRole, logout: appLogout } = useLocalAuth();
+    const { userRole, userData, logout: appLogout } = useLocalAuth();
     const isAdminRole = userRole === 'admin';
     
     const [data, setData] = useState({
-        branches: [{id: 1, name: "Principal"}],
+        branches: [
+            {id: 1, name: "Huérfanos"},
+            {id: 2, name: "Mojitas"},
+            {id: 3, name: "Apumanque"}
+        ],
         users: [{name:'admin', pass:'1234', role:'admin', branchId: 1}],
         cats: [{id:1, name:'General', tOr:2, tRe:5, tCr:10}],
         techs: [{id:1, name:'fulanito'}],
@@ -17,11 +21,11 @@ const AlertaMonitor = () => {
         history: []
     });
     
-    // Usuario simulado basado en el rol de la app principal
+    // Usuario actual basado en la autenticación
     const [currentUser] = useState({ 
-        name: isAdminRole ? 'admin' : 'operador', 
+        name: userData?.monitorUser ? userData.name : (isAdminRole ? 'admin' : 'operador'),
         role: isAdminRole ? 'admin' : 'creator', 
-        branchId: 1 
+        branchId: userData?.monitorUser ? userData.branchId : 1
     });
     const [activeTab, setActiveTab] = useState('entry');
     const [currentTheme, setCurrentTheme] = useState('light');

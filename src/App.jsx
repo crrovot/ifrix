@@ -142,8 +142,8 @@ const App = () => {
                     />
                 )}
 
-                {/* Tab: Reportes */}
-                {activeTab === TABS.REPORTS && (
+                {/* Tab: Reportes - Solo para admin */}
+                {activeTab === TABS.REPORTS && isAdmin && (
                     <ReportsPage 
                         orders={orders}
                         technicians={technicians}

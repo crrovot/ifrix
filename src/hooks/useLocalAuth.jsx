@@ -21,6 +21,16 @@ export const LocalAuthProvider = ({ children }) => {
             return null;
         }
     });
+    const [userData, setUserData] = useState(() => {
+        const token = localStorage.getItem(AUTH_TOKEN_KEY);
+        if (!token) return null;
+        try {
+            const obj = JSON.parse(token);
+            return obj.userData || null;
+        } catch {
+            return null;
+        }
+    });
     const [isSetup, setIsSetup] = useState(() => !!localStorage.getItem(AUTH_HASH_KEY));
     const [loading, setLoading] = useState(false);
 
@@ -45,6 +55,7 @@ export const LocalAuthProvider = ({ children }) => {
         setLoading(true);
         try {
             let role = null;
+            let userData = null;
             
             // Verificar contraseña de admin
             if (password === DEFAULT_PASSWORD_ADMIN) {
@@ -62,15 +73,39 @@ export const LocalAuthProvider = ({ children }) => {
                 }
             }
             
+            // Si no es usuario predefinido, verificar usuarios del Monitor
+            if (!role) {
+                const monitorData = localStorage.getItem('monitor_v11_0_user_edit');
+                if (monitorData) {
+                    try {
+                        const data = JSON.parse(monitorData);
+                        const user = data.users?.find(u => u.pass === password);
+                        if (user) {
+                            // Mapear rol del monitor al sistema
+                            role = user.role === 'admin' ? 'admin' : 'operator';
+                            userData = {
+                                name: user.name,
+                                branchId: user.branchId,
+                                monitorUser: true
+                            };
+                        }
+                    } catch (e) {
+                        console.error('Error parsing monitor data', e);
+                    }
+                }
+            }
+            
             if (role) {
                 const token = JSON.stringify({ 
                     t: Date.now(), 
                     exp: Date.now() + 1000 * 60 * 60 * 24 * 7,
-                    role: role
+                    role: role,
+                    userData: userData
                 });
                 localStorage.setItem(AUTH_TOKEN_KEY, token);
                 setIsAuthenticated(true);
                 setUserRole(role);
+                setUserData(userData);
                 return true;
             }
             return false;
@@ -83,6 +118,7 @@ export const LocalAuthProvider = ({ children }) => {
         localStorage.removeItem(AUTH_TOKEN_KEY);
         setIsAuthenticated(false);
         setUserRole(null);
+        setUserData(null);
     };
 
     // Comprobar token con expiración
@@ -96,6 +132,7 @@ export const LocalAuthProvider = ({ children }) => {
             } else {
                 setIsAuthenticated(true);
                 setUserRole(obj.role || 'admin');
+                setUserData(obj.userData || null);
             }
         } catch (e) {
             console.error('Invalid auth token', e);
@@ -106,6 +143,7 @@ export const LocalAuthProvider = ({ children }) => {
     const value = {
         isAuthenticated,
         userRole,
+        userData,
         isSetup,
         loading,
         setPassword,

@@ -23,6 +23,7 @@ export const Login = () => {
                         <p className="font-semibold mb-1">Usuarios disponibles:</p>
                         <p><span className="font-bold">Admin:</span> Ifrix2025# (acceso total)</p>
                         <p><span className="font-bold">Operador:</span> operador123 (solo Monitor)</p>
+                        <p className="mt-2 text-gray-600 italic">También puedes usar la contraseña de usuarios creados en el Monitor</p>
                     </div>
                     <input
                         type="password"
