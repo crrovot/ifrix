@@ -60,16 +60,33 @@ export const LocalAuthProvider = ({ children }) => {
             // Verificar contraseña de admin
             if (password === DEFAULT_PASSWORD_ADMIN) {
                 role = 'admin';
+                // Admin no tiene branchId específico, puede ver todas
+                userData = {
+                    name: 'Administrador',
+                    branchId: null, // null significa acceso a todas las sucursales
+                    monitorUser: false
+                };
             }
             // Verificar contraseña de operador
             else if (password === DEFAULT_PASSWORD_OPERATOR) {
                 role = 'operator';
+                // Operador predeterminado se asigna a la primera sucursal disponible
+                userData = {
+                    name: 'Operador',
+                    branchId: 1, // Sucursal Huérfanos por defecto
+                    monitorUser: false
+                };
             }
             // Verificar contraseña personalizada (siempre es admin)
             else {
                 const hash = localStorage.getItem(AUTH_HASH_KEY);
                 if (hash && bcrypt.compareSync(password, hash)) {
                     role = 'admin';
+                    userData = {
+                        name: 'Admin',
+                        branchId: null,
+                        monitorUser: false
+                    };
                 }
             }
             

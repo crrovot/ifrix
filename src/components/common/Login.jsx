@@ -17,27 +17,21 @@ export const Login = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
             <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-6">
-                <form onSubmit={handleLogin} className="space-y-3">
-                    <h3 className="font-semibold text-lg text-center">Ingresar al Sistema</h3>
-                    <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs">
-                        <p className="font-semibold mb-1">Usuarios disponibles:</p>
-                        <p><span className="font-bold">Admin:</span> Ifrix2025# (acceso total)</p>
-                        <p><span className="font-bold">Operador:</span> operador123 (solo Monitor)</p>
-                        <p className="mt-2 text-gray-600 italic">También puedes usar la contraseña de usuarios creados en el Monitor</p>
-                    </div>
+                <form onSubmit={handleLogin} className="space-y-4">
+                    <h3 className="font-semibold text-xl text-center text-gray-800">Ingresar al Sistema</h3>
                     <input
                         type="password"
                         placeholder="Contraseña"
                         value={password}
                         onChange={(e) => setPass(e.target.value)}
-                        className="w-full p-2 border rounded"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
                         autoFocus
                     />
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                    {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                     <button 
                         type="submit"
                         disabled={loading}
-                        className="w-full py-2 bg-cyan-500 text-white rounded font-semibold hover:bg-cyan-600 disabled:bg-gray-400"
+                        className="w-full py-3 bg-cyan-500 text-white rounded-lg font-semibold hover:bg-cyan-600 disabled:bg-gray-400 transition-colors"
                     >
                         {loading ? 'Procesando...' : 'Entrar'}
                     </button>
