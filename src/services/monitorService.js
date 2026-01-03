@@ -152,11 +152,17 @@ export const findUserByPassword = async (password) => {
         .from('monitor_users')
         .select('*')
         .eq('pass', password)
-        .single();
+        .maybeSingle();
     
     if (error) {
+        console.error('Error finding user by password:', error);
         return null;
     }
+    
+    if (!data) {
+        return null;
+    }
+    
     // Convertir de snake_case a camelCase
     return {
         id: data.id,
