@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import bcrypt from 'bcryptjs';
+import { findUserByPassword } from '../services/monitorService';
 
 const AUTH_HASH_KEY = 'ifrix_auth_hash';
 const AUTH_TOKEN_KEY = 'ifrix_auth_token';
@@ -90,24 +91,41 @@ export const LocalAuthProvider = ({ children }) => {
                 }
             }
             
-            // Si no es usuario predefinido, verificar usuarios del Monitor
+            // Si no es usuario predefinido, verificar usuarios del Monitor en Supabase
             if (!role) {
-                const monitorData = localStorage.getItem('monitor_v11_0_user_edit');
-                if (monitorData) {
-                    try {
-                        const data = JSON.parse(monitorData);
-                        const user = data.users?.find(u => u.pass === password);
-                        if (user) {
-                            // Mapear rol del monitor al sistema
-                            role = user.role === 'admin' ? 'admin' : 'operator';
-                            userData = {
-                                name: user.name,
-                                branchId: user.branchId,
-                                monitorUser: true
-                            };
+                try {
+                    const user = await findUserByPassword(password);
+                    if (user) {
+                        // Mapear rol del monitor al sistema
+                        role = user.role === 'admin' ? 'admin' : 'operator';
+                        userData = {
+                            name: user.name,
+                            branchId: user.branchId,
+                            monitorUser: true
+                        };
+                    }
+                } catch (error) {
+                    console.error('Error fetching user from Supabase:', error);
+                }
+                
+                // Fallback: verificar en localStorage (para compatibilidad temporal)
+                if (!role) {
+                    const monitorData = localStorage.getItem('monitor_v11_0_user_edit');
+                    if (monitorData) {
+                        try {
+                            const data = JSON.parse(monitorData);
+                            const user = data.users?.find(u => u.pass === password);
+                            if (user) {
+                                role = user.role === 'admin' ? 'admin' : 'operator';
+                                userData = {
+                                    name: user.name,
+                                    branchId: user.branchId,
+                                    monitorUser: true
+                                };
+                            }
+                        } catch (e) {
+                            console.error('Error parsing monitor data', e);
                         }
-                    } catch (e) {
-                        console.error('Error parsing monitor data', e);
                     }
                 }
             }
