@@ -62,10 +62,15 @@ const AlertaMonitor = () => {
         applyTheme();
     }, []);
     
-    // Actualizar monitor cada segundo
+    // Actualizar monitor cada segundo y sincronizar con localStorage
     useEffect(() => {
         const interval = setInterval(() => {
-            setData(prev => ({...prev})); // Force re-render
+            // Recargar datos desde localStorage para sincronizar entre tabs
+            const stored = localStorage.getItem(DB_KEY);
+            if(stored) {
+                const parsedData = JSON.parse(stored);
+                setData(parsedData);
+            }
         }, 1000);
         return () => clearInterval(interval);
     }, []);
@@ -123,6 +128,7 @@ const AlertaMonitor = () => {
             start: Date.now() 
         });
         saveData(newData);
+        setData(newData); // Actualizar el estado inmediatamente
         setNewOrderId('');
     };
     
@@ -141,6 +147,7 @@ const AlertaMonitor = () => {
             newData.history.push({...o, deletedBy: currentUser.name, deletedAt: Date.now()});
             newData.orders = newData.orders.filter(x => x.id !== id);
             saveData(newData);
+            setData(newData); // Actualizar el estado inmediatamente
         }
     };
     
@@ -157,6 +164,7 @@ const AlertaMonitor = () => {
             toKill.forEach(o => newData.history.push({...o, deletedBy: currentUser.name, deletedAt: Date.now()}));
             newData.orders = newData.orders.filter(o => !toKill.some(k => k === o));
             saveData(newData);
+            setData(newData); // Actualizar el estado inmediatamente
         }
     };
     
