@@ -1,25 +1,10 @@
-// AlertaMonitor.jsx - Sistema de monitor de turnos/órdenes temporal
+// AlertaMonitor.jsx - Sistema de monitor de turnos/órdenes con Supabase
 import React, { useState, useEffect } from 'react';
-import { useLocalAuth } from '../../hooks';
-
-const DB_KEY = 'monitor_v11_0_user_edit';
+import { useLocalAuth, useMonitorData } from '../../hooks';
 
 const AlertaMonitor = () => {
     const { userRole, userData, logout: appLogout } = useLocalAuth();
     const isAdminRole = userRole === 'admin';
-    
-    const [data, setData] = useState({
-        branches: [
-            {id: 1, name: "Huérfanos"},
-            {id: 2, name: "Mojitas"},
-            {id: 3, name: "Apumanque"}
-        ],
-        users: [{name:'admin', pass:'1234', role:'admin', branchId: 1}],
-        cats: [{id:1, name:'General', tOr:2, tRe:5, tCr:10}],
-        techs: [{id:1, name:'fulanito'}],
-        orders: [],
-        history: []
-    });
     
     // Usuario actual basado en la autenticación
     const [currentUser] = useState({ 
@@ -27,6 +12,27 @@ const AlertaMonitor = () => {
         role: isAdminRole ? 'admin' : 'creator', 
         branchId: userData?.monitorUser ? userData.branchId : 1
     });
+
+    // Hook de datos del monitor (reemplaza localStorage con Supabase)
+    const {
+        data,
+        loading,
+        error,
+        refresh,
+        addOrder: createOrder,
+        deleteOrder: removeOrder,
+        clearOrders,
+        addBranch: createBranch,
+        deleteBranch: removeBranch,
+        addTechnician: createTechnician,
+        deleteTechnician: removeTechnician,
+        addCategory: createCategory,
+        deleteCategory: removeCategory,
+        addUser,
+        updateUser,
+        deleteUser
+    } = useMonitorData(currentUser);
+
     const [activeTab, setActiveTab] = useState('entry');
     const [currentTheme, setCurrentTheme] = useState('light');
     
@@ -40,7 +46,7 @@ const AlertaMonitor = () => {
     const [newUserName, setNewUserName] = useState('');
     const [newUserPass, setNewUserPass] = useState('');
     const [newUserRole, setNewUserRole] = useState('creator');
-    const [newUserBranch, setNewUserBranch] = useState('');
+    const [newUserBranch, setNewUserBranch] = useState(1);
     const [onlyViewMonitor, setOnlyViewMonitor] = useState('vierwer');
     
     // Estado para otras entidades
@@ -53,33 +59,13 @@ const AlertaMonitor = () => {
     const [auditSearch, setAuditSearch] = useState('');
     const [adminBranchFilter, setAdminBranchFilter] = useState('all');
     
-    // Cargar datos al iniciar
+    // Cargar tema al iniciar
     useEffect(() => {
-        const stored = localStorage.getItem(DB_KEY);
-        if(stored) {
-            setData(JSON.parse(stored));
-        }
         applyTheme();
     }, []);
     
-    // Actualizar monitor cada segundo y sincronizar con localStorage
-    useEffect(() => {
-        const interval = setInterval(() => {
-            // Recargar datos desde localStorage para sincronizar entre tabs
-            const stored = localStorage.getItem(DB_KEY);
-            if(stored) {
-                const parsedData = JSON.parse(stored);
-                setData(parsedData);
-            }
-        }, 1000);
-        return () => clearInterval(interval);
-    }, []);
-    
-    // Guardar datos
-    const saveData = (newData) => {
-        localStorage.setItem(DB_KEY, JSON.stringify(newData));
-        setData(newData);
-    };
+    // Los datos ya se cargan automáticamente desde useMonitorData
+    // No necesitamos localStorage ni intervalo de actualización
     
     // Temas
     const cycleTheme = () => {
@@ -104,7 +90,7 @@ const AlertaMonitor = () => {
     };
     
     // Órdenes
-    const addOrder = () => {
+    const addOrder = async () => {
         const id = parseInt(newOrderId);
         const tech = selectedTech;
         const catId = parseInt(selectedCat);
@@ -118,8 +104,7 @@ const AlertaMonitor = () => {
             return alert(`¡ERROR!\nLa orden #${id} ya está activa en la sucursal: ${conflictName}.`);
         }
         
-        const newData = {...data};
-        newData.orders.push({ 
+        const created = await createOrder({ 
             id, 
             tech: tech||"PEND", 
             catId, 
@@ -127,12 +112,13 @@ const AlertaMonitor = () => {
             branchId: currentUser.branchId, 
             start: Date.now() 
         });
-        saveData(newData);
-        setData(newData); // Actualizar el estado inmediatamente
-        setNewOrderId('');
+        
+        if (created) {
+            setNewOrderId('');
+        }
     };
     
-    const delOrder = (id) => {
+    const delOrder = async (id) => {
         const o = data.orders.find(x => x.id === id);
         if(!o) return;
         
@@ -143,59 +129,59 @@ const AlertaMonitor = () => {
         }
         
         if(confirm("¿Borrar?")) {
-            const newData = {...data};
-            newData.history.push({...o, deletedBy: currentUser.name, deletedAt: Date.now()});
-            newData.orders = newData.orders.filter(x => x.id !== id);
-            saveData(newData);
-            setData(newData); // Actualizar el estado inmediatamente
+            await removeOrder(id, currentUser.name);
         }
     };
     
-    const clearAll = () => {
+    const clearAll = async () => {
         if(confirm("¿Limpiar pantalla?")) {
-            let toKill = [];
             if(currentUser.role === 'admin') {
-                toKill = (adminBranchFilter === 'all') ? data.orders : data.orders.filter(o => o.branchId == adminBranchFilter);
+                const branchId = adminBranchFilter === 'all' ? null : parseInt(adminBranchFilter);
+                await clearOrders(branchId, currentUser.name);
             } else {
-                toKill = data.orders.filter(o => o.branchId == currentUser.branchId);
+                await clearOrders(currentUser.branchId, currentUser.name);
             }
-            
-            const newData = {...data};
-            toKill.forEach(o => newData.history.push({...o, deletedBy: currentUser.name, deletedAt: Date.now()}));
-            newData.orders = newData.orders.filter(o => !toKill.some(k => k === o));
-            saveData(newData);
-            setData(newData); // Actualizar el estado inmediatamente
         }
     };
     
     // Usuarios
-    const saveUserProcess = () => {
+    const saveUserProcess = async () => {
         const n = newUserName.trim();
         const p = newUserPass.trim();
         const r = newUserRole;
-        const b = newUserBranch;
+        const b = parseInt(newUserBranch);
         
         if(!n || !p) return alert("Faltan datos");
+        if(!b || isNaN(b)) return alert("Selecciona una sucursal válida");
         
-        const newData = {...data};
-        
-        if (editingUserOriginalName) {
-            const index = newData.users.findIndex(u => u.name === editingUserOriginalName);
-            if (index !== -1) {
-                if(n !== editingUserOriginalName && newData.users.some(u => u.name === n)) {
+        try {
+            if (editingUserOriginalName) {
+                if(n !== editingUserOriginalName && data.users.some(u => u.name === n)) {
                     return alert("El nuevo nombre de usuario ya está en uso.");
                 }
-                newData.users[index] = { name: n, pass: p, role: r, branchId: b };
-                saveData(newData);
-                alert("Usuario actualizado");
-                cancelEditUser();
+                const updated = await updateUser(editingUserOriginalName, { name: n, pass: p, role: r, branchId: b });
+                if(updated) {
+                    alert("Usuario actualizado");
+                    cancelEditUser();
+                } else {
+                    alert("Error: No se pudo actualizar el usuario. Verifica la consola.");
+                }
+            } else {
+                if(data.users.some(u => u.name === n)) return alert("El usuario ya existe");
+                console.log("Creando usuario:", {name:n, pass:p, role:r, branchId:b});
+                const created = await addUser({name:n, pass:p, role:r, branchId:b});
+                console.log("Usuario creado:", created);
+                if(created) {
+                    alert("Usuario creado exitosamente");
+                    setNewUserName('');
+                    setNewUserPass('');
+                } else {
+                    alert("Error: No se pudo crear el usuario. Verifica la consola y que las tablas de Supabase estén creadas.");
+                }
             }
-        } else {
-            if(newData.users.some(u => u.name === n)) return alert("El usuario ya existe");
-            newData.users.push({name:n, pass:p, role:r, branchId:b});
-            saveData(newData);
-            setNewUserName('');
-            setNewUserPass('');
+        } catch (err) {
+            console.error("Error en saveUserProcess:", err);
+            alert("Error: " + err.message);
         }
     };
     
@@ -216,62 +202,54 @@ const AlertaMonitor = () => {
         setNewUserPass('');
     };
     
-    const dropUser = (n) => {
+    const dropUser = async (n) => {
         if(n === currentUser.name) return alert("No puedes borrar tu propio usuario activo.");
         if(confirm("¿Eliminar usuario " + n + "?")) {
-            const newData = {...data};
-            newData.users = newData.users.filter(x => x.name !== n);
-            saveData(newData);
+            await deleteUser(n);
         }
     };
     
     // Sucursales, Técnicos, Categorías
-    const addBranch = () => {
+    const addBranch = async () => {
         if(newBranchName) {
-            const newData = {...data};
-            newData.branches.push({id:Date.now(), name:newBranchName});
-            saveData(newData);
-            setNewBranchName('');
+            const created = await createBranch(newBranchName);
+            if(created) {
+                setNewBranchName('');
+            }
         }
     };
     
-    const dropBranch = (id) => {
-        const newData = {...data};
-        newData.branches = newData.branches.filter(x => x.id !== id);
-        saveData(newData);
+    const dropBranch = async (id) => {
+        await removeBranch(id);
     };
     
-    const addTech = () => {
+    const addTech = async () => {
         if(newTechName) {
-            const newData = {...data};
-            newData.techs.push({id:Date.now(), name:newTechName});
-            saveData(newData);
-            setNewTechName('');
+            const created = await createTechnician(newTechName);
+            if(created) {
+                setNewTechName('');
+            }
         }
     };
     
-    const dropTech = (id) => {
-        const newData = {...data};
-        newData.techs = newData.techs.filter(x => x.id !== id);
-        saveData(newData);
+    const dropTech = async (id) => {
+        await removeTechnician(id);
     };
     
-    const addCat = () => {
+    const addCat = async () => {
         if(catName) {
-            const newData = {...data};
-            newData.cats.push({id:Date.now(), name:catName, tOr:catOr, tRe:catRe, tCr:catCr});
-            saveData(newData);
-            setCatName('');
-            setCatOr('');
-            setCatRe('');
-            setCatCr('');
+            const created = await createCategory({ name: catName, tOr: catOr, tRe: catRe, tCr: catCr });
+            if(created) {
+                setCatName('');
+                setCatOr('');
+                setCatRe('');
+                setCatCr('');
+            }
         }
     };
     
-    const dropCat = (id) => {
-        const newData = {...data};
-        newData.cats = newData.cats.filter(x => x.id !== id);
-        saveData(newData);
+    const dropCat = async (id) => {
+        await removeCategory(id);
     };
     
     // Renderizado del monitor
@@ -667,7 +645,7 @@ const AlertaMonitor = () => {
                                 </select>
                                 <select 
                                     value={newUserBranch}
-                                    onChange={(e) => setNewUserBranch(e.target.value)}
+                                    onChange={(e) => setNewUserBranch(parseInt(e.target.value))}
                                     className={`w-full p-2 rounded mb-2 ${colors.input}`}
                                 >
                                     {data.branches.map(b => (

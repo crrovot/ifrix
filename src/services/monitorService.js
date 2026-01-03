@@ -70,21 +70,33 @@ export const getMonitorUsers = async () => {
 };
 
 export const addMonitorUser = async (user) => {
+    console.log('addMonitorUser - input:', user);
+    
+    const insertData = {
+        name: user.name,
+        pass: user.pass,
+        role: user.role,
+        branch_id: user.branchId
+    };
+    
+    console.log('addMonitorUser - insertData:', insertData);
+    
     const { data, error } = await supabase
         .from('monitor_users')
-        .insert([{
-            name: user.name,
-            pass: user.pass,
-            role: user.role,
-            branch_id: user.branchId
-        }])
+        .insert(insertData)
         .select()
         .single();
     
     if (error) {
-        console.error('Error adding user:', error);
+        console.error('Error adding user - FULL ERROR:', error);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
         return null;
     }
+    
+    console.log('User created successfully:', data);
+    
     // Convertir de vuelta a camelCase
     return {
         id: data.id,
