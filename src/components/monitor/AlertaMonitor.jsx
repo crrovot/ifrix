@@ -407,33 +407,57 @@ const AlertaMonitor = () => {
         const canDel = (currentUser.role === 'admin' || currentUser.branchId == o.branchId);
 
         return (
-            <div key={o.id} className={`${colorClass} text-white rounded-lg p-3 relative flex flex-col justify-between shadow-inner`}>
+            <div key={o.id} className={`${colorClass} text-white rounded-lg p-3 relative flex flex-col shadow-inner min-h-0`}>
                 {canDel && (
                     <button
                         onClick={() => delOrder(o.id)}
-                        className="absolute top-1 right-1 bg-black bg-opacity-30 text-white rounded-full w-6 h-6 font-bold z-20 hover:bg-opacity-50"
+                        className="absolute top-1 right-1 bg-black bg-opacity-30 text-white rounded-full w-6 h-6 font-bold z-20 hover:bg-opacity-50 text-xs"
                     >
-                        X
+                        ✕
                     </button>
                 )}
-                <div className="flex justify-between items-center overflow-hidden gap-1">
-                    <div className={`font-black leading-none truncate ${isTiny ? 'text-[clamp(2rem,10vh,5rem)] text-center w-full' : 'text-5xl'}`}>
+
+                {/* Número de orden */}
+                <div className="flex justify-center items-center mb-2">
+                    <div className={`font-black leading-none ${isTiny ? 'text-[clamp(3rem,12vh,6rem)]' : 'text-6xl'}`}>
                         {o.id}
                     </div>
-                    {!isTiny && <div className="text-sm truncate opacity-80">{o.creator}</div>}
                 </div>
+
+                {/* Técnico asignado */}
                 {!isTiny && (
-                    <div className="font-bold text-center text-2xl uppercase bg-black bg-opacity-20 rounded my-2">
-                        {o.tech}
+                    <div className="bg-black bg-opacity-30 rounded px-2 py-1 mb-2 text-center">
+                        <div className="text-[0.65rem] opacity-70 uppercase tracking-wide">Técnico</div>
+                        <div className="font-bold text-lg uppercase truncate">{o.tech || 'PEND'}</div>
                     </div>
                 )}
-                <div className="flex justify-between items-center text-[clamp(0.6rem,1.5vh,0.875rem)] mt-auto border-t border-white border-opacity-20 pt-1">
-                    {!isTiny && (
-                        <div className="max-w-[50%] font-semibold uppercase truncate">
-                            {cat.name} <span className="opacity-60">- {branchName}</span>
+
+                {/* Información adicional */}
+                {!isTiny && (
+                    <div className="grid grid-cols-2 gap-1 text-[0.7rem] mb-2">
+                        <div className="bg-black bg-opacity-20 rounded px-2 py-1">
+                            <div className="opacity-60 text-[0.6rem] uppercase">Creado por</div>
+                            <div className="font-semibold truncate">{o.creator}</div>
                         </div>
-                    )}
-                    <div className="font-mono font-bold ml-auto">{timeStr}</div>
+                        <div className="bg-black bg-opacity-20 rounded px-2 py-1">
+                            <div className="opacity-60 text-[0.6rem] uppercase">Sucursal</div>
+                            <div className="font-semibold truncate">{branchName}</div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Timer y categoría */}
+                <div className="mt-auto pt-2 border-t border-white border-opacity-20">
+                    <div className="flex justify-between items-center">
+                        {!isTiny && (
+                            <div className="text-[0.65rem] font-semibold uppercase truncate max-w-[50%] opacity-80">
+                                {cat.name}
+                            </div>
+                        )}
+                        <div className={`font-mono font-bold ml-auto ${isTiny ? 'text-2xl' : 'text-xl'}`}>
+                            {timeStr}
+                        </div>
+                    </div>
                 </div>
             </div>
         );
