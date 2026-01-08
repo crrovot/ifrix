@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS monitor_users (
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     pass TEXT NOT NULL,
-    role TEXT NOT NULL CHECK (role IN ('admin', 'creator')),
+    role TEXT NOT NULL CHECK (role IN ('admin', 'creator', 'technician')),
     branch_id BIGINT REFERENCES monitor_branches(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -5,13 +5,22 @@ import { useLocalAuth, useMonitorData } from '../../hooks';
 const AlertaMonitor = () => {
     const { userRole, userData, logout: appLogout } = useLocalAuth();
     const isAdminRole = userRole === 'admin';
-    
-    // Usuario actual basado en la autenticación
-    const [currentUser] = useState({ 
-        name: userData?.monitorUser ? userData.name : (isAdminRole ? 'admin' : 'operador'),
-        role: isAdminRole ? 'admin' : 'creator', 
-        branchId: userData?.monitorUser ? userData.branchId : 1
+
+    // Usuario actual basado en la autenticación (ahora simplificado)
+    const [currentUser, setCurrentUser] = useState({
+        name: userData?.name || 'Administrador',
+        role: userRole || 'admin',
+        branchId: userData?.branchId || 1
     });
+
+    // Función para cambiar de rol rápidamente (para este "proyecto absurdo")
+    const switchRole = (role, name = 'Tecnico1') => {
+        setCurrentUser(prev => ({
+            ...prev,
+            role: role,
+            name: role === 'admin' ? 'Administrador' : name
+        }));
+    };
 
     // Hook de datos del monitor (reemplaza localStorage con Supabase)
     const {
@@ -35,12 +44,35 @@ const AlertaMonitor = () => {
 
     const [activeTab, setActiveTab] = useState('entry');
     const [currentTheme, setCurrentTheme] = useState('light');
-    
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    // Toggle Fullscreen
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+            setIsFullscreen(true);
+        } else {
+            document.exitFullscreen();
+            setIsFullscreen(false);
+        }
+    };
+
+    // Escuchar cambios de fullscreen del sistema
+    useEffect(() => {
+        const handleFsChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFsChange);
+        return () => document.removeEventListener('fullscreenchange', handleFsChange);
+    }, []);
+
     // Estado para nueva orden
     const [newOrderId, setNewOrderId] = useState('');
     const [selectedTech, setSelectedTech] = useState('');
     const [selectedCat, setSelectedCat] = useState('');
-    
+
     // Estado para gestión de usuarios
     const [editingUserOriginalName, setEditingUserOriginalName] = useState(null);
     const [newUserName, setNewUserName] = useState('');
@@ -48,7 +80,10 @@ const AlertaMonitor = () => {
     const [newUserRole, setNewUserRole] = useState('creator');
     const [newUserBranch, setNewUserBranch] = useState(1);
     const [onlyViewMonitor, setOnlyViewMonitor] = useState('vierwer');
-    
+
+    // Estado para alertas sonoras técnicos
+    const [alertedOrders, setAlertedOrders] = useState(new Set());
+
     // Estado para otras entidades
     const [newBranchName, setNewBranchName] = useState('');
     const [newTechName, setNewTechName] = useState('');
@@ -58,84 +93,80 @@ const AlertaMonitor = () => {
     const [catCr, setCatCr] = useState('');
     const [auditSearch, setAuditSearch] = useState('');
     const [adminBranchFilter, setAdminBranchFilter] = useState('all');
-    
+
     // Cargar tema al iniciar
     useEffect(() => {
         applyTheme();
     }, []);
-    
-    // Los datos ya se cargan automáticamente desde useMonitorData
-    // No necesitamos localStorage ni intervalo de actualización
-    
+
     // Temas
     const cycleTheme = () => {
         let newTheme = 'light';
-        if(currentTheme === 'light') newTheme = 'dark';
-        else if(currentTheme === 'dark') newTheme = 'ifrix-dark';
-        else if(currentTheme === 'ifrix-dark') newTheme = 'ifrix-light';
+        if (currentTheme === 'light') newTheme = 'dark';
+        else if (currentTheme === 'dark') newTheme = 'ifrix-dark';
+        else if (currentTheme === 'ifrix-dark') newTheme = 'ifrix-light';
         setCurrentTheme(newTheme);
         localStorage.setItem('appTheme', newTheme);
     };
-    
+
     const applyTheme = () => {
         const savedTheme = localStorage.getItem('appTheme') || 'light';
         setCurrentTheme(savedTheme);
     };
-    
+
     const getThemeButtonText = () => {
-        if(currentTheme === 'dark') return "🌙 Oscuro";
-        if(currentTheme === 'ifrix-dark') return "🟢 Ifrix Dark";
-        if(currentTheme === 'ifrix-light') return "⚪ Ifrix Light";
+        if (currentTheme === 'dark') return "🌙 Oscuro";
+        if (currentTheme === 'ifrix-dark') return "🟢 Ifrix Dark";
+        if (currentTheme === 'ifrix-light') return "⚪ Ifrix Light";
         return "🌞 Claro";
     };
-    
+
     // Órdenes
     const addOrder = async () => {
         const id = parseInt(newOrderId);
         const tech = selectedTech;
         const catId = parseInt(selectedCat);
-        
-        if(!id) return alert("Falta numero");
-        
+
+        if (!id) return alert("Falta numero");
+
         const duplicate = data.orders.find(o => o.id === id);
-        if(duplicate) {
+        if (duplicate) {
             const conflictBranch = data.branches.find(b => b.id == duplicate.branchId);
             const conflictName = conflictBranch ? conflictBranch.name : "Desconocida";
             return alert(`¡ERROR!\nLa orden #${id} ya está activa en la sucursal: ${conflictName}.`);
         }
-        
-        const created = await createOrder({ 
-            id, 
-            tech: tech||"PEND", 
-            catId, 
-            creator: currentUser.name, 
-            branchId: currentUser.branchId, 
-            start: Date.now() 
+
+        const created = await createOrder({
+            id,
+            tech: tech || "PEND",
+            catId,
+            creator: currentUser.name,
+            branchId: currentUser.branchId,
+            start: Date.now()
         });
-        
+
         if (created) {
             setNewOrderId('');
         }
     };
-    
+
     const delOrder = async (id) => {
         const o = data.orders.find(x => x.id === id);
-        if(!o) return;
-        
-        // Verificar permisos: admin puede eliminar todo, operadores solo su sucursal
-        if(currentUser.role !== 'admin' && o.branchId !== currentUser.branchId) {
+        if (!o) return;
+
+        if (currentUser.role !== 'admin' && o.branchId !== currentUser.branchId) {
             alert('No tienes permiso para eliminar esta orden');
             return;
         }
-        
-        if(confirm("¿Borrar?")) {
+
+        if (confirm("¿Borrar?")) {
             await removeOrder(id, currentUser.name);
         }
     };
-    
+
     const clearAll = async () => {
-        if(confirm("¿Limpiar pantalla?")) {
-            if(currentUser.role === 'admin') {
+        if (confirm("¿Limpiar pantalla?")) {
+            if (currentUser.role === 'admin') {
                 const branchId = adminBranchFilter === 'all' ? null : parseInt(adminBranchFilter);
                 await clearOrders(branchId, currentUser.name);
             } else {
@@ -143,40 +174,38 @@ const AlertaMonitor = () => {
             }
         }
     };
-    
+
     // Usuarios
     const saveUserProcess = async () => {
         const n = newUserName.trim();
         const p = newUserPass.trim();
         const r = newUserRole;
         const b = parseInt(newUserBranch);
-        
-        if(!n || !p) return alert("Faltan datos");
-        if(!b || isNaN(b)) return alert("Selecciona una sucursal válida");
-        
+
+        if (!n || !p) return alert("Faltan datos");
+        if (!b || isNaN(b)) return alert("Selecciona una sucursal válida");
+
         try {
             if (editingUserOriginalName) {
-                if(n !== editingUserOriginalName && data.users.some(u => u.name === n)) {
+                if (n !== editingUserOriginalName && data.users.some(u => u.name === n)) {
                     return alert("El nuevo nombre de usuario ya está en uso.");
                 }
                 const updated = await updateUser(editingUserOriginalName, { name: n, pass: p, role: r, branchId: b });
-                if(updated) {
+                if (updated) {
                     alert("Usuario actualizado");
                     cancelEditUser();
                 } else {
                     alert("Error: No se pudo actualizar el usuario. Verifica la consola.");
                 }
             } else {
-                if(data.users.some(u => u.name === n)) return alert("El usuario ya existe");
-                console.log("Creando usuario:", {name:n, pass:p, role:r, branchId:b});
-                const created = await addUser({name:n, pass:p, role:r, branchId:b});
-                console.log("Usuario creado:", created);
-                if(created) {
+                if (data.users.some(u => u.name === n)) return alert("El usuario ya existe");
+                const created = await addUser({ name: n, pass: p, role: r, branchId: b });
+                if (created) {
                     alert("Usuario creado exitosamente");
                     setNewUserName('');
                     setNewUserPass('');
                 } else {
-                    alert("Error: No se pudo crear el usuario. Verifica la consola y que las tablas de Supabase estén creadas.");
+                    alert("Error: No se pudo crear el usuario.");
                 }
             }
         } catch (err) {
@@ -184,62 +213,62 @@ const AlertaMonitor = () => {
             alert("Error: " + err.message);
         }
     };
-    
+
     const prepareEditUser = (name) => {
         const user = data.users.find(u => u.name === name);
-        if(!user) return;
-        
+        if (!user) return;
+
         setNewUserName(user.name);
         setNewUserPass(user.pass);
         setNewUserRole(user.role);
         setNewUserBranch(user.branchId);
         setEditingUserOriginalName(name);
     };
-    
+
     const cancelEditUser = () => {
         setEditingUserOriginalName(null);
         setNewUserName('');
         setNewUserPass('');
     };
-    
+
     const dropUser = async (n) => {
-        if(n === currentUser.name) return alert("No puedes borrar tu propio usuario activo.");
-        if(confirm("¿Eliminar usuario " + n + "?")) {
+        if (n === currentUser.name) return alert("No puedes borrar tu propio usuario activo.");
+        if (confirm("¿Eliminar usuario " + n + "?")) {
             await deleteUser(n);
         }
     };
-    
+
     // Sucursales, Técnicos, Categorías
     const addBranch = async () => {
-        if(newBranchName) {
+        if (newBranchName) {
             const created = await createBranch(newBranchName);
-            if(created) {
+            if (created) {
                 setNewBranchName('');
             }
         }
     };
-    
+
     const dropBranch = async (id) => {
         await removeBranch(id);
     };
-    
+
     const addTech = async () => {
-        if(newTechName) {
+        if (newTechName) {
             const created = await createTechnician(newTechName);
-            if(created) {
+            if (created) {
                 setNewTechName('');
             }
         }
     };
-    
+
     const dropTech = async (id) => {
         await removeTechnician(id);
     };
-    
+
     const addCat = async () => {
-        if(catName) {
+        if (catName) {
             const created = await createCategory({ name: catName, tOr: catOr, tRe: catRe, tCr: catCr });
-            if(created) {
+            if (created) {
                 setCatName('');
                 setCatOr('');
                 setCatRe('');
@@ -247,93 +276,174 @@ const AlertaMonitor = () => {
             }
         }
     };
-    
+
     const dropCat = async (id) => {
         await removeCategory(id);
     };
-    
+
     // Renderizado del monitor
     const getFilteredOrders = () => {
-        if(!currentUser) return [];
-        
-        console.log('getFilteredOrders - currentUser:', currentUser);
-        console.log('getFilteredOrders - data.orders:', data.orders);
-        console.log('getFilteredOrders - adminBranchFilter:', adminBranchFilter);
-        
+        if (!currentUser) return [];
+
+        const isTechnician = currentUser.role === 'technician';
+        const technicianBranch = data.branches.find(b => b.id == currentUser.branchId);
+        const hasAccessToAll = technicianBranch && technicianBranch.name.toLowerCase() === 'todas';
+
         let orders = [];
-        if(currentUser.role === 'admin') {
-            // Admin puede ver todas o filtrar por sucursal específica
-            orders = (adminBranchFilter === 'all') ? data.orders : data.orders.filter(o => o.branchId == adminBranchFilter);
+        if (currentUser.role === 'admin' || (isTechnician && hasAccessToAll)) {
+            orders = (adminBranchFilter === 'all' || (isTechnician && hasAccessToAll))
+                ? data.orders
+                : data.orders.filter(o => o.branchId == adminBranchFilter);
         } else {
-            // Operadores solo ven su sucursal
             orders = data.orders.filter(o => o.branchId == currentUser.branchId);
         }
-        
-        console.log('getFilteredOrders - orders filtradas:', orders);
-        return orders.sort((a, b) => a.start - b.start);
+
+        // Función para calcular el nivel de urgencia de una orden
+        const getUrgencyLevel = (order) => {
+            const cat = data.cats.find(c => c.id === order.catId) || { tOr: 2, tRe: 5, tCr: 10 };
+            const now = Date.now();
+            const elapsedMin = (now - order.start) / 60000;
+
+            if (elapsedMin >= cat.tCr) return 4; // Crítico (rojo parpadeante)
+            if (elapsedMin >= cat.tRe) return 3; // Rojo
+            if (elapsedMin >= cat.tOr) return 2; // Naranja
+            return 1; // Verde
+        };
+
+        // Priorización para técnicos (mantiene lógica existente + urgencia)
+        if (isTechnician) {
+            return orders.sort((a, b) => {
+                const aIsMine = a.tech === currentUser.name;
+                const bIsMine = b.tech === currentUser.name;
+                const aIsPend = a.tech === 'PEND' || !a.tech;
+                const bIsPend = b.tech === 'PEND' || !b.tech;
+
+                // Primero: mis órdenes
+                if (aIsMine && !bIsMine) return -1;
+                if (!aIsMine && bIsMine) return 1;
+
+                // Segundo: pendientes
+                if (aIsPend && !bIsPend) return -1;
+                if (!aIsPend && bIsPend) return 1;
+
+                // Tercero: por urgencia (más urgente primero)
+                const urgencyDiff = getUrgencyLevel(b) - getUrgencyLevel(a);
+                if (urgencyDiff !== 0) return urgencyDiff;
+
+                // Cuarto: por antigüedad (más antigua primero)
+                return a.start - b.start;
+            });
+        }
+
+        // Priorización para admin y operadores: por urgencia y antigüedad
+        return orders.sort((a, b) => {
+            // Primero: por urgencia (más urgente primero)
+            const urgencyDiff = getUrgencyLevel(b) - getUrgencyLevel(a);
+            if (urgencyDiff !== 0) return urgencyDiff;
+
+            // Segundo: por antigüedad (más antigua primero)
+            return a.start - b.start;
+        });
     };
-    
+
+    // Efecto para alertas sonoras (Solo técnicos)
+    useEffect(() => {
+        if (currentUser.role !== 'technician') return;
+
+        const checkAlerts = () => {
+            const now = Date.now();
+            const redOrders = data.orders.filter(o => {
+                if (alertedOrders.has(o.id)) return false;
+
+                const cat = data.cats.find(c => c.id === o.catId) || { tRe: 5 };
+                const elapsedMin = (now - o.start) / 60000;
+                return elapsedMin >= cat.tRe;
+            });
+
+            if (redOrders.length > 0) {
+                // Reproducir sonido en loop por 5 segundos
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                audio.loop = true;
+                audio.play().catch(e => console.log("Audio play blocked"));
+
+                // Detener el sonido después de 5 segundos
+                setTimeout(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }, 5000);
+
+                setAlertedOrders(prev => {
+                    const next = new Set(prev);
+                    redOrders.forEach(o => next.add(o.id));
+                    return next;
+                });
+            }
+        };
+
+        const interval = setInterval(checkAlerts, 5000);
+        return () => clearInterval(interval);
+    }, [data.orders, data.cats, currentUser.role, alertedOrders]);
+
     const renderOrderCard = (o, isTiny, now) => {
-        const cat = data.cats.find(c => c.id === o.catId) || { 
-            id: 0, 
-            name: 'Sin categoría', 
-            tOr: 2, 
-            tRe: 5, 
-            tCr: 10 
+        const cat = data.cats.find(c => c.id === o.catId) || {
+            id: 0,
+            name: 'Sin categoría',
+            tOr: 2,
+            tRe: 5,
+            tCr: 10
         };
         const branch = data.branches.find(b => b.id == o.branchId);
         const branchName = branch ? branch.name : "??";
-        
+
         const elapsedMin = (now - o.start) / 60000;
         let colorClass = 'bg-green-600';
-        if(elapsedMin >= cat.tCr) colorClass = 'bg-red-600 border-4 border-white animate-pulse';
-        else if(elapsedMin >= cat.tRe) colorClass = 'bg-red-600';
-        else if(elapsedMin >= cat.tOr) colorClass = 'bg-orange-500';
-        
-        const sec = Math.floor((now - o.start)/1000);
-        const timeStr = `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`;
-        
+        if (elapsedMin >= cat.tCr) colorClass = 'bg-red-600 border-4 border-white animate-pulse';
+        else if (elapsedMin >= cat.tRe) colorClass = 'bg-red-600';
+        else if (elapsedMin >= cat.tOr) colorClass = 'bg-orange-500';
+
+        const sec = Math.floor((now - o.start) / 1000);
+        const timeStr = `${Math.floor(sec / 60).toString().padStart(2, '0')}:${(sec % 60).toString().padStart(2, '0')}`;
+
         const canDel = (currentUser.role === 'admin' || currentUser.branchId == o.branchId);
-        
+
         return (
             <div key={o.id} className={`${colorClass} text-white rounded-lg p-3 relative flex flex-col justify-between shadow-inner`}>
                 {canDel && (
-                    <button 
+                    <button
                         onClick={() => delOrder(o.id)}
                         className="absolute top-1 right-1 bg-black bg-opacity-30 text-white rounded-full w-6 h-6 font-bold z-20 hover:bg-opacity-50"
                     >
                         X
                     </button>
                 )}
-                <div className="flex justify-between">
-                    <div className={`font-black leading-none ${isTiny ? 'text-8xl text-center w-full' : 'text-5xl'}`}>
+                <div className="flex justify-between items-center overflow-hidden gap-1">
+                    <div className={`font-black leading-none truncate ${isTiny ? 'text-[clamp(2rem,10vh,5rem)] text-center w-full' : 'text-5xl'}`}>
                         {o.id}
                     </div>
-                    {!isTiny && <div className="text-sm">{o.creator}</div>}
+                    {!isTiny && <div className="text-sm truncate opacity-80">{o.creator}</div>}
                 </div>
                 {!isTiny && (
                     <div className="font-bold text-center text-2xl uppercase bg-black bg-opacity-20 rounded my-2">
                         {o.tech}
                     </div>
                 )}
-                <div className="flex justify-between items-end text-xs">
+                <div className="flex justify-between items-center text-[clamp(0.6rem,1.5vh,0.875rem)] mt-auto border-t border-white border-opacity-20 pt-1">
                     {!isTiny && (
-                        <div className="max-w-[65%] font-semibold uppercase overflow-hidden text-ellipsis whitespace-nowrap">
-                            {cat.name} - {branchName}
+                        <div className="max-w-[50%] font-semibold uppercase truncate">
+                            {cat.name} <span className="opacity-60">- {branchName}</span>
                         </div>
                     )}
-                    <div className="font-mono font-bold text-3xl">{timeStr}</div>
+                    <div className="font-mono font-bold ml-auto">{timeStr}</div>
                 </div>
             </div>
         );
     };
-    
-    const themeClass = currentTheme === 'dark' ? 'bg-slate-900 text-slate-100' : 
-                       currentTheme === 'ifrix-dark' ? 'bg-black text-white' : 
-                       currentTheme === 'ifrix-light' ? 'bg-white text-black' : 
-                       'bg-slate-100 text-slate-900';
-    
-    // Sistema de colores consistente
+
+    const themeClass = currentTheme === 'dark' ? 'bg-slate-900 text-slate-100' :
+        currentTheme === 'ifrix-dark' ? 'bg-black text-white' :
+            currentTheme === 'ifrix-light' ? 'bg-white text-black' :
+                'bg-slate-100 text-slate-900';
+
     const getThemeColors = () => {
         if (currentTheme === 'ifrix-dark') {
             return {
@@ -386,7 +496,6 @@ const AlertaMonitor = () => {
                 tabInactive: 'bg-slate-700 border border-slate-600 text-slate-300'
             };
         }
-        // Light theme (default)
         return {
             bg: 'bg-slate-100',
             bgCard: 'bg-white',
@@ -403,85 +512,97 @@ const AlertaMonitor = () => {
             tabInactive: 'bg-white border border-gray-300 text-gray-700'
         };
     };
-    
+
     const colors = getThemeColors();
-    const bName = currentUser.branchId 
-        ? (data.branches.find(b=>b.id == currentUser.branchId)?.name || "Global")
+    const bName = currentUser.branchId
+        ? (data.branches.find(b => b.id == currentUser.branchId)?.name || "Global")
         : "Todas las Sucursales";
     const orders = getFilteredOrders();
     const now = Date.now();
-    
+
     return (
-        <div className={`min-h-screen flex flex-col ${themeClass}`}>
+        <div className={`min-h-screen flex flex-col ${themeClass} ${isFullscreen ? 'fixed inset-0 z-[100]' : ''}`}>
             {/* Header */}
-            <div className={`${colors.header} px-5 py-3 flex justify-between items-center`}>
-                <span className={`font-black text-lg ${colors.text}`}>MONITOR ENTERPRISE</span>
-                <div className="flex items-center gap-4">
-                    <button onClick={cycleTheme} className={`px-3 py-1 border-2 ${colors.border} rounded text-sm font-bold ${colors.text} ${colors.primaryHover} transition-colors`}>
-                        {getThemeButtonText()}
-                    </button>
-                    <div className={`text-sm text-right ${colors.textAlt}`}>
-                        <div className="font-bold">{currentUser.name.toUpperCase()}</div>
-                        <div className="opacity-70">{bName}</div>
+            {!isFullscreen && (
+                <div className={`${colors.header} px-5 py-3 flex justify-between items-center`}>
+                    <span className={`font-black text-lg ${colors.text}`}>MONITOR ENTERPRISE</span>
+                    <div className="flex items-center gap-4">
+                        <div className="flex bg-gray-200 p-1 rounded-lg text-xs font-bold">
+                            <button
+                                onClick={() => switchRole('admin')}
+                                className={`px-2 py-1 rounded ${currentUser.role === 'admin' ? 'bg-white shadow text-black' : 'text-gray-500'}`}
+                            >
+                                ADMIN
+                            </button>
+                            <button
+                                onClick={() => switchRole('technician', 'Tecnico1')}
+                                className={`px-2 py-1 rounded ${currentUser.role === 'technician' ? 'bg-white shadow text-black' : 'text-gray-500'}`}
+                            >
+                                TÉCNICO
+                            </button>
+                        </div>
+                        <button onClick={cycleTheme} className={`px-3 py-1 border-2 ${colors.border} rounded text-sm font-bold ${colors.text} ${colors.primaryHover} transition-colors`}>
+                            {getThemeButtonText()}
+                        </button>
+                        <div className={`text-sm text-right ${colors.textAlt}`}>
+                            <div className="font-bold">{currentUser.name.toUpperCase()} ({currentUser.role})</div>
+                            <div className="opacity-70">{bName}</div>
+                        </div>
                     </div>
-                    <button 
-                        onClick={appLogout}
-                        className="bg-red-600 text-white px-3 py-1 rounded font-semibold hover:bg-red-700 transition-colors"
-                    >
-                        Salir
-                    </button>
                 </div>
-            </div>
-            
+            )}
+
             {/* Tabs */}
-            <div className={`flex justify-center gap-3 p-3 border-b ${colors.border}`}>
-                <button 
-                    onClick={() => setActiveTab('entry')}
-                    className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'entry' ? colors.tabActive : colors.tabInactive}`}
-                >
-                    1. Crear
-                </button>
-                <button 
-                    onClick={() => setActiveTab('monitor')}
-                    className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'monitor' ? colors.tabActive : colors.tabInactive}`}
-                >
-                    2. Monitor
-                </button>
-                {isAdminRole && (
-                    <>
-                        <button 
-                            onClick={() => setActiveTab('config')}
-                            className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'config' ? colors.tabActive : colors.tabInactive}`}
-                        >
-                            3. Config
-                        </button>
-                        <button 
-                            onClick={() => setActiveTab('audit')}
-                            className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'audit' ? colors.tabActive : colors.tabInactive}`}
-                        >
-                            4. Auditoría
-                        </button>
-                    </>
-                )}
-            </div>
-            
+            {!isFullscreen && (
+                <div className={`flex justify-center gap-3 p-3 border-b ${colors.border}`}>
+                    <button
+                        onClick={() => setActiveTab('entry')}
+                        className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'entry' ? colors.tabActive : colors.tabInactive}`}
+                    >
+                        1. Crear
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('monitor')}
+                        className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'monitor' ? colors.tabActive : colors.tabInactive}`}
+                    >
+                        2. Monitor
+                    </button>
+                    {isAdminRole && (
+                        <>
+                            <button
+                                onClick={() => setActiveTab('config')}
+                                className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'config' ? colors.tabActive : colors.tabInactive}`}
+                            >
+                                3. Config
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('audit')}
+                                className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'audit' ? colors.tabActive : colors.tabInactive}`}
+                            >
+                                4. Auditoría
+                            </button>
+                        </>
+                    )}
+                </div>
+            )}
+
             {/* Content Area */}
-            <div className="flex-1 overflow-auto p-5">
+            <div className={`flex-1 ${activeTab === 'monitor' ? 'overflow-hidden' : 'overflow-auto'} ${isFullscreen ? 'p-0' : 'p-5'}`}>
                 {/* Tab 1: Crear */}
                 {activeTab === 'entry' && (
                     <div className="max-w-lg mx-auto">
                         <div className={`${colors.bgCard} rounded-lg p-6 shadow mb-4 border-2 ${colors.border}`}>
                             <h2 className={`text-2xl font-bold mb-4 ${colors.text}`}>Nuevo Turno</h2>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 value={newOrderId}
-                                onChange={(e) => setNewOrderId(e.target.value.replace(/[^0-9]/g,''))}
+                                onChange={(e) => setNewOrderId(e.target.value.replace(/[^0-9]/g, ''))}
                                 placeholder="00"
                                 className={`w-full text-6xl font-black text-center p-3 rounded mb-3 ${colors.input}`}
                                 onKeyPress={(e) => e.key === 'Enter' && addOrder()}
                             />
                             <div className="grid grid-cols-2 gap-3 mb-3">
-                                <select 
+                                <select
                                     value={selectedTech}
                                     onChange={(e) => setSelectedTech(e.target.value)}
                                     className={`p-2 rounded ${colors.input}`}
@@ -491,7 +612,7 @@ const AlertaMonitor = () => {
                                         <option key={t.id} value={t.name}>{t.name}</option>
                                     ))}
                                 </select>
-                                <select 
+                                <select
                                     value={selectedCat}
                                     onChange={(e) => setSelectedCat(e.target.value)}
                                     className={`p-2 rounded ${colors.input}`}
@@ -501,21 +622,21 @@ const AlertaMonitor = () => {
                                     ))}
                                 </select>
                             </div>
-                            <button 
+                            <button
                                 onClick={addOrder}
                                 className={`w-full p-3 rounded font-semibold ${colors.button} transition-colors`}
                             >
                                 PUBLICAR
                             </button>
                         </div>
-                        
+
                         <div className={`${colors.bgCard} rounded-lg p-6 shadow border-l-4 border-orange-500`}>
                             <h3 className={`text-lg font-bold mb-3 ${colors.text}`}>Mis Órdenes Activas</h3>
                             <ul className="space-y-2">
                                 {orders.map(o => (
                                     <li key={o.id} className={`flex justify-between items-center p-2 border-b ${colors.border}`}>
                                         <span className={colors.textAlt}>#{o.id} ({o.tech})</span>
-                                        <button 
+                                        <button
                                             onClick={() => delOrder(o.id)}
                                             className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 font-semibold transition-colors"
                                         >
@@ -527,61 +648,83 @@ const AlertaMonitor = () => {
                         </div>
                     </div>
                 )}
-                
+
                 {/* Tab 2: Monitor */}
                 {activeTab === 'monitor' && (
-                    <div className="h-full flex flex-col">
-                        <div className={`flex justify-between p-3 mb-3 border-b ${colors.border}`}>
-                            {isAdminRole && (
-                                <select 
-                                    value={adminBranchFilter}
-                                    onChange={(e) => setAdminBranchFilter(e.target.value)}
-                                    className={`p-2 rounded ${colors.input}`}
-                                >
-                                    <option value="all">Ver Todo</option>
-                                    {data.branches.map(b => (
-                                        <option key={b.id} value={b.id}>{b.name}</option>
-                                    ))}
-                                </select>
-                            )}
-                            <button 
-                                onClick={clearAll}
-                                className={`px-4 py-2 rounded font-semibold ${colors.button} transition-colors`}
-                            >
-                                Limpiar Mi Pantalla
-                            </button>
-                        </div>
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                        {!isFullscreen && (
+                            <div className={`flex justify-between p-3 border-b ${colors.border} flex-shrink-0`}>
+                                {isAdminRole && (
+                                    <select
+                                        value={adminBranchFilter}
+                                        onChange={(e) => setAdminBranchFilter(e.target.value)}
+                                        className={`p-2 rounded ${colors.input}`}
+                                    >
+                                        <option value="all">Ver Todo</option>
+                                        {data.branches.map(b => (
+                                            <option key={b.id} value={b.id}>{b.name}</option>
+                                        ))}
+                                    </select>
+                                )}
+                                <div className="flex gap-2 ml-auto">
+                                    <button
+                                        onClick={toggleFullscreen}
+                                        className={`px-4 py-2 rounded font-semibold ${colors.button} transition-colors flex items-center gap-2`}
+                                        title="Expandir Pantalla"
+                                    >
+                                        ⛶ TV MODE
+                                    </button>
+                                    <button
+                                        onClick={clearAll}
+                                        className={`px-4 py-2 rounded font-semibold ${colors.button} transition-colors`}
+                                    >
+                                        Limpiar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         {orders.length === 0 ? (
                             <div className={`flex-1 flex items-center justify-center ${colors.textAlt}`}>
                                 <p className="text-2xl font-bold">No hay órdenes activas</p>
                             </div>
                         ) : (
-                            <div 
-                                id="monitor-grid" 
-                                className="flex-1 grid gap-2 p-2"
-                                style={{
-                                    gridTemplateColumns: (() => {
-                                        const count = orders.length;
-                                        if (count === 0) return '1fr';
-                                        // Cálculo dinámico basado en el ratio del contenedor
-                                        const cols = Math.ceil(Math.sqrt(count * 1.6));
-                                        return `repeat(${cols}, 1fr)`;
-                                    })(),
-                                    gridTemplateRows: (() => {
-                                        const count = orders.length;
-                                        if (count === 0) return '1fr';
-                                        const cols = Math.ceil(Math.sqrt(count * 1.6));
-                                        const rows = Math.ceil(count / cols);
-                                        return `repeat(${rows}, 1fr)`;
-                                    })()
-                                }}
-                            >
-                                {orders.map(o => renderOrderCard(o, orders.length > 15, now))}
+                            <div className="flex-1 overflow-hidden p-3">
+                                <div
+                                    id="monitor-grid"
+                                    className="w-full h-full grid gap-3"
+                                    style={{
+                                        gridTemplateColumns: (() => {
+                                            const count = orders.length;
+                                            if (count === 0) return '1fr';
+                                            if (count === 1) return '1fr';
+                                            if (count === 2) return 'repeat(2, 1fr)';
+                                            if (count <= 4) return 'repeat(2, 1fr)';
+                                            if (count <= 6) return 'repeat(3, 1fr)';
+                                            if (count <= 9) return 'repeat(3, 1fr)';
+                                            if (count <= 12) return 'repeat(4, 1fr)';
+                                            if (count <= 16) return 'repeat(4, 1fr)';
+                                            return 'repeat(5, 1fr)';
+                                        })(),
+                                        gridAutoRows: '1fr'
+                                    }}
+                                >
+                                    {orders.map(o => renderOrderCard(o, orders.length > 15, now))}
+                                </div>
                             </div>
+                        )}
+
+                        {isFullscreen && (
+                            <button
+                                onClick={toggleFullscreen}
+                                className="fixed bottom-4 right-4 bg-black bg-opacity-30 text-white p-2 rounded-full hover:bg-opacity-50 z-[110] text-xs opacity-0 hover:opacity-100 transition-opacity"
+                                title="Salir de Pantalla Completa"
+                            >
+                                ⛶ Esc
+                            </button>
                         )}
                     </div>
                 )}
-                
+
                 {/* Tab 3: Config */}
                 {activeTab === 'config' && isAdminRole && (
                     <div className="grid grid-cols-2 gap-5">
@@ -589,7 +732,7 @@ const AlertaMonitor = () => {
                             <div className={`${colors.bgCard} rounded-lg p-6 shadow mb-4 border-2 ${colors.border}`}>
                                 <h3 className={`text-lg font-bold mb-3 ${colors.text}`}>Sucursales</h3>
                                 <div className="flex gap-2 mb-3">
-                                    <input 
+                                    <input
                                         value={newBranchName}
                                         onChange={(e) => setNewBranchName(e.target.value)}
                                         placeholder="Nombre"
@@ -606,11 +749,11 @@ const AlertaMonitor = () => {
                                     ))}
                                 </ul>
                             </div>
-                            
+
                             <div className={`${colors.bgCard} rounded-lg p-6 shadow border-2 ${colors.border}`}>
                                 <h3 className={`text-lg font-bold mb-3 ${colors.text}`}>Técnicos</h3>
                                 <div className="flex gap-2 mb-3">
-                                    <input 
+                                    <input
                                         value={newTechName}
                                         onChange={(e) => setNewTechName(e.target.value)}
                                         placeholder="Nombre"
@@ -628,32 +771,33 @@ const AlertaMonitor = () => {
                                 </ul>
                             </div>
                         </div>
-                        
+
                         <div>
                             <div className={`${colors.bgCard} rounded-lg p-6 shadow mb-4 border-2 ${colors.border}`}>
                                 <h3 className={`text-lg font-bold mb-3 ${colors.text}`}>Gestión de Usuarios</h3>
-                                <input 
+                                <input
                                     value={newUserName}
                                     onChange={(e) => setNewUserName(e.target.value)}
                                     placeholder="Usuario"
                                     className={`w-full p-2 rounded mb-2 ${colors.input}`}
                                 />
-                                <input 
+                                <input
                                     type="password"
                                     value={newUserPass}
                                     onChange={(e) => setNewUserPass(e.target.value)}
                                     placeholder="Clave"
                                     className={`w-full p-2 rounded mb-2 ${colors.input}`}
                                 />
-                                <select 
+                                <select
                                     value={newUserRole}
                                     onChange={(e) => setNewUserRole(e.target.value)}
                                     className={`w-full p-2 rounded mb-2 ${colors.input}`}
                                 >
                                     <option value="creator">Operador</option>
                                     <option value="admin">Admin</option>
+                                    <option value="technician">Técnico</option>
                                 </select>
-                                <select 
+                                <select
                                     value={newUserBranch}
                                     onChange={(e) => setNewUserBranch(parseInt(e.target.value))}
                                     className={`w-full p-2 rounded mb-2 ${colors.input}`}
@@ -662,21 +806,21 @@ const AlertaMonitor = () => {
                                         <option key={b.id} value={b.id}>{b.name}</option>
                                     ))}
                                 </select>
-                                <button 
+                                <button
                                     onClick={saveUserProcess}
                                     className={`w-full p-2 rounded font-semibold mb-2 ${colors.button} transition-colors`}
                                 >
                                     {editingUserOriginalName ? 'Guardar Cambios' : 'Crear Usuario'}
                                 </button>
                                 {editingUserOriginalName && (
-                                    <button 
+                                    <button
                                         onClick={cancelEditUser}
                                         className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 transition-colors"
                                     >
                                         Cancelar Edición
                                     </button>
                                 )}
-                                
+
                                 <ul className="space-y-2 mt-4">
                                     {data.users.map(u => {
                                         const b = data.branches.find(br => br.id == u.branchId);
@@ -687,13 +831,13 @@ const AlertaMonitor = () => {
                                                     {u.name} ({u.role}) - <small className={colors.text}>{bName}</small>
                                                 </span>
                                                 <div className="flex gap-1">
-                                                    <button 
+                                                    <button
                                                         onClick={() => prepareEditUser(u.name)}
                                                         className={`px-2 py-1 text-xs rounded font-bold ${colors.button} transition-colors`}
                                                     >
                                                         Edit
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={() => dropUser(u.name)}
                                                         className="bg-red-600 text-white px-2 py-1 text-xs rounded font-bold hover:bg-red-700 transition-colors"
                                                     >
@@ -705,31 +849,31 @@ const AlertaMonitor = () => {
                                     })}
                                 </ul>
                             </div>
-                            
+
                             <div className={`${colors.bgCard} rounded-lg p-6 shadow border-2 ${colors.border}`}>
                                 <h3 className={`text-lg font-bold mb-3 ${colors.text}`}>Categorías</h3>
-                                <input 
+                                <input
                                     value={catName}
                                     onChange={(e) => setCatName(e.target.value)}
                                     placeholder="Nombre"
                                     className={`w-full p-2 rounded mb-2 ${colors.input}`}
                                 />
                                 <div className="flex gap-2 mb-2">
-                                    <input 
+                                    <input
                                         value={catOr}
                                         onChange={(e) => setCatOr(e.target.value)}
                                         placeholder="Nar"
                                         type="number"
                                         className={`flex-1 p-2 rounded ${colors.input}`}
                                     />
-                                    <input 
+                                    <input
                                         value={catRe}
                                         onChange={(e) => setCatRe(e.target.value)}
                                         placeholder="Roj"
                                         type="number"
                                         className={`flex-1 p-2 rounded ${colors.input}`}
                                     />
-                                    <input 
+                                    <input
                                         value={catCr}
                                         onChange={(e) => setCatCr(e.target.value)}
                                         placeholder="Cri"
@@ -752,12 +896,12 @@ const AlertaMonitor = () => {
                         </div>
                     </div>
                 )}
-                
+
                 {/* Tab 4: Auditoría */}
                 {activeTab === 'audit' && isAdminRole && (
                     <div className={`${colors.bgCard} rounded-lg p-6 shadow border-2 ${colors.border}`}>
                         <h3 className={`text-lg font-bold mb-3 ${colors.text}`}>Auditoría</h3>
-                        <input 
+                        <input
                             value={auditSearch}
                             onChange={(e) => setAuditSearch(e.target.value)}
                             placeholder="Buscar ticket..."
