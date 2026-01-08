@@ -43,7 +43,7 @@ const AlertaMonitor = () => {
         updateOrder
     } = useMonitorData(currentUser);
 
-    const [activeTab, setActiveTab] = useState('entry');
+    const [activeTab, setActiveTab] = useState(currentUser.role === 'technician' ? 'monitor' : 'entry');
     const [currentTheme, setCurrentTheme] = useState('light');
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -59,6 +59,13 @@ const AlertaMonitor = () => {
             setIsFullscreen(false);
         }
     };
+
+    // Redirigir si es técnico y está en tab prohibido
+    useEffect(() => {
+        if (currentUser.role === 'technician' && activeTab === 'entry') {
+            setActiveTab('monitor');
+        }
+    }, [currentUser.role]);
 
     // Escuchar cambios de fullscreen del sistema
     useEffect(() => {
@@ -140,7 +147,16 @@ const AlertaMonitor = () => {
     const addOrder = async () => {
         const id = parseInt(newOrderId);
         const tech = selectedTech;
-        const catId = parseInt(selectedCat);
+        let catId = parseInt(selectedCat);
+
+        // Si no hay categoría seleccionada, usar la primera por defecto
+        if (!catId || isNaN(catId)) {
+            if (data.cats.length > 0) {
+                catId = data.cats[0].id;
+            } else {
+                return alert("No hay categorías configuradas. Contacte a soporte.");
+            }
+        }
 
         if (!id) return alert("Falta numero");
 
@@ -301,12 +317,11 @@ const AlertaMonitor = () => {
         if (!currentUser) return [];
 
         const isTechnician = currentUser.role === 'technician';
-        const technicianBranch = data.branches.find(b => b.id == currentUser.branchId);
-        const hasAccessToAll = technicianBranch && technicianBranch.name.toLowerCase() === 'todas';
 
         let orders = [];
-        if (currentUser.role === 'admin' || (isTechnician && hasAccessToAll)) {
-            orders = (adminBranchFilter === 'all' || (isTechnician && hasAccessToAll))
+        // Solo Admin puede filtrar o ver todo. Los demás solo su sucursal.
+        if (currentUser.role === 'admin') {
+            orders = adminBranchFilter === 'all'
                 ? data.orders
                 : data.orders.filter(o => o.branchId == adminBranchFilter);
         } else {
@@ -325,8 +340,11 @@ const AlertaMonitor = () => {
             return 1; // Verde
         };
 
-        // Priorización para técnicos (mantiene lógica existente + urgencia)
+        // Priorización para técnicos
         if (isTechnician) {
+            // FILTRO ESTRICTO: Solo mis órdenes o pendientes
+            orders = orders.filter(o => o.tech === currentUser.name || o.tech === 'PEND' || !o.tech);
+
             return orders.sort((a, b) => {
                 const aIsMine = a.tech === currentUser.name;
                 const bIsMine = b.tech === currentUser.name;
@@ -581,6 +599,12 @@ const AlertaMonitor = () => {
     const orders = getFilteredOrders();
     const now = Date.now();
 
+    // Combinar técnicos manuales y usuarios con rol 'technician'
+    const uniqueTechs = [...new Set([
+        ...data.techs.map(t => t.name),
+        ...data.users.filter(u => u.role === 'technician').map(u => u.name)
+    ])].sort();
+
     return (
         <div className={`min-h-screen flex flex-col ${themeClass} ${isFullscreen ? 'fixed inset-0 z-[100]' : ''}`}>
             {/* Header */}
@@ -616,12 +640,14 @@ const AlertaMonitor = () => {
             {/* Tabs */}
             {!isFullscreen && (
                 <div className={`flex justify-center gap-3 p-3 border-b ${colors.border}`}>
-                    <button
-                        onClick={() => setActiveTab('entry')}
-                        className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'entry' ? colors.tabActive : colors.tabInactive}`}
-                    >
-                        1. Crear
-                    </button>
+                    {currentUser.role !== 'technician' && (
+                        <button
+                            onClick={() => setActiveTab('entry')}
+                            className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'entry' ? colors.tabActive : colors.tabInactive}`}
+                        >
+                            1. Crear
+                        </button>
+                    )}
                     <button
                         onClick={() => setActiveTab('monitor')}
                         className={`px-5 py-2 rounded font-semibold transition-colors ${activeTab === 'monitor' ? colors.tabActive : colors.tabInactive}`}
@@ -669,8 +695,8 @@ const AlertaMonitor = () => {
                                     className={`p-2 rounded ${colors.input}`}
                                 >
                                     <option value="">-- Sin Asignar --</option>
-                                    {data.techs.map(t => (
-                                        <option key={t.id} value={t.name}>{t.name}</option>
+                                    {uniqueTechs.map(name => (
+                                        <option key={name} value={name}>{name}</option>
                                     ))}
                                 </select>
                                 <select
@@ -715,7 +741,7 @@ const AlertaMonitor = () => {
                     <div className="flex-1 flex flex-col overflow-hidden">
                         {!isFullscreen && (
                             <div className={`flex justify-between p-3 border-b ${colors.border} flex-shrink-0`}>
-                                {isAdminRole && (
+                                {currentUser.role === 'admin' && (
                                     <select
                                         value={adminBranchFilter}
                                         onChange={(e) => setAdminBranchFilter(e.target.value)}
@@ -1010,7 +1036,7 @@ const AlertaMonitor = () => {
                                     onChange={(e) => setEditingOrder({ ...editingOrder, tech: e.target.value })}
                                 >
                                     <option value="">-- PENDIENTE --</option>
-                                    {data.techs.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                                    {uniqueTechs.map(name => <option key={name} value={name}>{name}</option>)}
                                 </select>
                             </div>
 
