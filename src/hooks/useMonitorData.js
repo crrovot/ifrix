@@ -38,7 +38,7 @@ export const useMonitorData = (currentUser) => {
                 orders: orders.length,
                 history: history.length
             });
-            
+
             console.log('Orders:', orders);
 
             setData({
@@ -67,13 +67,13 @@ export const useMonitorData = (currentUser) => {
     // Cargar datos al montar
     useEffect(() => {
         loadData();
-        
+
         // Polling cada 15 segundos para sincronizar datos entre sedes
         const intervalId = setInterval(() => {
             console.log('Refrescando datos del monitor...');
             loadData();
         }, 15000); // 15 segundos
-        
+
         return () => clearInterval(intervalId);
     }, []);
 
@@ -82,7 +82,7 @@ export const useMonitorData = (currentUser) => {
         // Suscripción a órdenes
         const ordersSubscription = supabase
             .channel('monitor-orders-changes')
-            .on('postgres_changes', 
+            .on('postgres_changes',
                 { event: '*', schema: 'public', table: 'monitor_orders' },
                 async (payload) => {
                     console.log('🔔 Cambio detectado en monitor_orders:', payload);
@@ -189,6 +189,23 @@ export const useMonitorData = (currentUser) => {
         }
     };
 
+    const updateOrder = async (id, updates) => {
+        try {
+            const updated = await monitorService.updateOrder(id, updates);
+            if (updated) {
+                setData(prev => ({
+                    ...prev,
+                    orders: prev.orders.map(o => o.id === id ? updated : o)
+                }));
+                return updated;
+            }
+            return null;
+        } catch (err) {
+            console.error('Error updating order:', err);
+            return null;
+        }
+    };
+
     const deleteOrder = async (id, deletedBy) => {
         try {
             const order = data.orders.find(o => o.id === id);
@@ -224,7 +241,7 @@ export const useMonitorData = (currentUser) => {
 
     const clearOrders = async (branchId, deletedBy) => {
         try {
-            const ordersToClear = branchId 
+            const ordersToClear = branchId
                 ? data.orders.filter(o => o.branchId === branchId)
                 : data.orders;
 
@@ -251,7 +268,7 @@ export const useMonitorData = (currentUser) => {
 
             setData(prev => ({
                 ...prev,
-                orders: branchId 
+                orders: branchId
                     ? prev.orders.filter(o => o.branchId !== branchId)
                     : []
             }));
@@ -439,6 +456,7 @@ export const useMonitorData = (currentUser) => {
         refresh: loadData,
         // Órdenes
         addOrder,
+        updateOrder,
         deleteOrder,
         clearOrders,
         // Sucursales

@@ -39,7 +39,8 @@ const AlertaMonitor = () => {
         deleteCategory: removeCategory,
         addUser,
         updateUser,
-        deleteUser
+        deleteUser,
+        updateOrder
     } = useMonitorData(currentUser);
 
     const [activeTab, setActiveTab] = useState('entry');
@@ -93,6 +94,20 @@ const AlertaMonitor = () => {
     const [catCr, setCatCr] = useState('');
     const [auditSearch, setAuditSearch] = useState('');
     const [adminBranchFilter, setAdminBranchFilter] = useState('all');
+
+    // Estado para editar orden
+    const [editingOrder, setEditingOrder] = useState(null);
+
+    const updateOrderHandler = async () => {
+        if (!editingOrder) return;
+
+        await updateOrder(editingOrder.id, {
+            tech: editingOrder.tech,
+            catId: editingOrder.catId,
+            branchId: editingOrder.branchId
+        });
+        setEditingOrder(null);
+    };
 
     // Cargar tema al iniciar
     useEffect(() => {
@@ -403,22 +418,36 @@ const AlertaMonitor = () => {
 
         const sec = Math.floor((now - o.start) / 1000);
         const totalMinutes = Math.floor(sec / 60);
-        const hours = Math.floor(totalMinutes / 60);
+        const totalHours = Math.floor(totalMinutes / 60);
+        const days = Math.floor(totalHours / 24);
+        const hours = totalHours % 24;
         const minutes = totalMinutes % 60;
         const seconds = sec % 60;
 
-        // Si pasó más de 60 minutos, mostrar en formato HH:MM
-        const timeStr = totalMinutes >= 60
-            ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}h`
-            : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        // Formato según el tiempo transcurrido
+        let timeStr;
+        if (totalHours >= 24) {
+            // Más de 24 horas: mostrar DD:HHd (días:horas)
+            timeStr = `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}d`;
+        } else if (totalMinutes >= 60) {
+            // Más de 60 minutos: mostrar HH:MMh (horas:minutos)
+            timeStr = `${totalHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}h`;
+        } else {
+            // Menos de 60 minutos: mostrar MM:SS (minutos:segundos)
+            timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
 
         const canDel = (currentUser.role === 'admin' || currentUser.branchId == o.branchId);
 
         return (
-            <div key={o.id} className={`${colorClass} text-white rounded-lg p-3 relative flex flex-col shadow-inner min-h-0`}>
+            <div
+                key={o.id}
+                className={`${colorClass} text-white rounded-lg p-3 relative flex flex-col shadow-inner min-h-0 cursor-pointer hover:opacity-90 transition-opacity`}
+                onClick={() => setEditingOrder(o)}
+            >
                 {canDel && (
                     <button
-                        onClick={() => delOrder(o.id)}
+                        onClick={(e) => { e.stopPropagation(); delOrder(o.id); }}
                         className="absolute top-1 right-1 bg-black bg-opacity-30 text-white rounded-full w-6 h-6 font-bold z-20 hover:bg-opacity-50 text-xs"
                     >
                         ✕
@@ -964,6 +993,64 @@ const AlertaMonitor = () => {
                                     })}
                             </tbody>
                         </table>
+                    </div>
+                )}
+
+                {/* Modal de Edición de Orden */}
+                {editingOrder && (
+                    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[200]">
+                        <div className={`${currentTheme === 'dark' || currentTheme === 'ifrix-dark' ? 'bg-slate-800 text-white' : 'bg-white text-black'} p-6 rounded-lg w-full max-w-md shadow-2xl border border-gray-500`}>
+                            <h2 className="text-2xl font-bold mb-4 border-b pb-2">Editar Orden #{editingOrder.id}</h2>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-1 opacity-80">Técnico Asignado</label>
+                                <select
+                                    className="w-full p-2 rounded border border-gray-500 bg-transparent"
+                                    value={editingOrder.tech}
+                                    onChange={(e) => setEditingOrder({ ...editingOrder, tech: e.target.value })}
+                                >
+                                    <option value="">-- PENDIENTE --</option>
+                                    {data.techs.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-1 opacity-80">Categoría</label>
+                                <select
+                                    className="w-full p-2 rounded border border-gray-500 bg-transparent"
+                                    value={editingOrder.catId}
+                                    onChange={(e) => setEditingOrder({ ...editingOrder, catId: parseInt(e.target.value) })}
+                                >
+                                    {data.cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-1 opacity-80">Sucursal</label>
+                                <select
+                                    className="w-full p-2 rounded border border-gray-500 bg-transparent"
+                                    value={editingOrder.branchId}
+                                    onChange={(e) => setEditingOrder({ ...editingOrder, branchId: parseInt(e.target.value) })}
+                                >
+                                    {data.branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="flex justify-end gap-2 mt-6">
+                                <button
+                                    onClick={() => setEditingOrder(null)}
+                                    className="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600 font-semibold"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={updateOrderHandler}
+                                    className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 font-bold"
+                                >
+                                    Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
