@@ -402,7 +402,15 @@ const AlertaMonitor = () => {
         else if (elapsedMin >= cat.tOr) colorClass = 'bg-orange-500';
 
         const sec = Math.floor((now - o.start) / 1000);
-        const timeStr = `${Math.floor(sec / 60).toString().padStart(2, '0')}:${(sec % 60).toString().padStart(2, '0')}`;
+        const totalMinutes = Math.floor(sec / 60);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        const seconds = sec % 60;
+
+        // Si pasó más de 60 minutos, mostrar en formato HH:MM
+        const timeStr = totalMinutes >= 60
+            ? `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}h`
+            : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
         const canDel = (currentUser.role === 'admin' || currentUser.branchId == o.branchId);
 
@@ -732,7 +740,7 @@ const AlertaMonitor = () => {
                                         gridAutoRows: '1fr'
                                     }}
                                 >
-                                    {orders.map(o => renderOrderCard(o, orders.length > 15, now))}
+                                    {orders.map(o => renderOrderCard(o, false, now))}
                                 </div>
                             </div>
                         )}
