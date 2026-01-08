@@ -13,14 +13,7 @@ const AlertaMonitor = () => {
         branchId: userData?.branchId || 1
     });
 
-    // Función para cambiar de rol rápidamente (para este "proyecto absurdo")
-    const switchRole = (role, name = 'Tecnico1') => {
-        setCurrentUser(prev => ({
-            ...prev,
-            role: role,
-            name: role === 'admin' ? 'Administrador' : name
-        }));
-    };
+
 
     // Hook de datos del monitor (reemplaza localStorage con Supabase)
     const {
@@ -612,20 +605,6 @@ const AlertaMonitor = () => {
                 <div className={`${colors.header} px-5 py-3 flex justify-between items-center`}>
                     <span className={`font-black text-lg ${colors.text}`}>MONITOR ENTERPRISE</span>
                     <div className="flex items-center gap-4">
-                        <div className="flex bg-gray-200 p-1 rounded-lg text-xs font-bold">
-                            <button
-                                onClick={() => switchRole('admin')}
-                                className={`px-2 py-1 rounded ${currentUser.role === 'admin' ? 'bg-white shadow text-black' : 'text-gray-500'}`}
-                            >
-                                ADMIN
-                            </button>
-                            <button
-                                onClick={() => switchRole('technician', 'Tecnico1')}
-                                className={`px-2 py-1 rounded ${currentUser.role === 'technician' ? 'bg-white shadow text-black' : 'text-gray-500'}`}
-                            >
-                                TÉCNICO
-                            </button>
-                        </div>
                         <button onClick={cycleTheme} className={`px-3 py-1 border-2 ${colors.border} rounded text-sm font-bold ${colors.text} ${colors.primaryHover} transition-colors`}>
                             {getThemeButtonText()}
                         </button>
